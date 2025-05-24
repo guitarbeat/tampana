@@ -1,11 +1,5 @@
-import { useState } from 'react';
 import VerticalSplit from './components/VerticalSplit/VerticalSplit';
-import { SplitDetent } from './components/VerticalSplit/SplitDetent';
 import styled from 'styled-components';
-import PersonIcon from '@mui/icons-material/Person';
-import SearchIcon from '@mui/icons-material/Search';
-import ChatIcon from '@mui/icons-material/Chat';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 
 // Styled components for the app
 const AppContainer = styled.div`
@@ -15,28 +9,27 @@ const AppContainer = styled.div`
   right: 0;
   bottom: 0;
   overflow: hidden;
-  background-color: #000;
+  background: #000;
   width: 100vw;
   height: 100vh;
   color: #fff;
 `;
 
 const Panel = styled.div`
-  height: 100%;
-  background-color: #1a1a1a;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-`;
-
-const CenteredNumber = styled.div`
-  flex: 1;
+  flex: 1 1 0%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #1a1a1a;
+`;
+
+const CenteredNumber = styled.div`
   font-size: 7rem;
   color: #fff;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 function App() {
@@ -53,16 +46,7 @@ function App() {
             <CenteredNumber>2</CenteredNumber>
           </Panel>
         }
-        initialDetent={SplitDetent.FRACTION_3_6}
         bgColor="#1a1a1a"
-        leadingAccessories={[
-          { id: 'profile', icon: <PersonIcon />, action: () => console.log('Profile clicked') },
-          { id: 'search', icon: <SearchIcon />, action: () => console.log('Search clicked') }
-        ]}
-        trailingAccessories={[
-          { id: 'messages', icon: <ChatIcon />, action: () => console.log('Messages clicked') },
-          { id: 'add', icon: <AddCircleIcon />, action: () => console.log('Add clicked') }
-        ]}
       />
     </AppContainer>
   );

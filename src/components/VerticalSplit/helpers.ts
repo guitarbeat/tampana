@@ -1,5 +1,5 @@
 // Helpers for VerticalSplit (React/TypeScript version)
-import styled, { css } from 'styled-components';
+import { css } from 'styled-components';
 
 // 1. Button scale down style (for press feedback)
 export const scaleDownButtonStyle = css`
@@ -11,6 +11,11 @@ export const scaleDownButtonStyle = css`
   }
 `;
 
+// 2. Blur transition helper (for CSS transitions)
+export const blurTransition = (radius: number = 4) => css`
+  filter: blur(${radius}px);
+  transition: filter 0.3s;
+`;
 
 // 3. Get safe area insets (web fallback)
 export function getSafeAreaInsets() {
@@ -20,7 +25,11 @@ export function getSafeAreaInsets() {
       // Try both env() and --
       let value = getComputedStyle(document.documentElement).getPropertyValue(`env(${name})`);
       if (!value) value = getComputedStyle(document.documentElement).getPropertyValue(`--${name}`);
-      if (value) return parseInt(value, 10) || 0;
+      if (value) {
+        // Remove units and whitespace, parse as float
+        const num = parseFloat(value.trim());
+        return isNaN(num) ? 0 : num;
+      }
     }
     return 0;
   };
@@ -32,14 +41,9 @@ export function getSafeAreaInsets() {
   };
 }
 
-// 4. Blur transition helper (for CSS transitions)
-export function blurTransition(radius: number = 4) {
-  return `filter: blur(${radius}px); transition: filter 0.3s;`;
-}
-
-// 5. Get text color for background (for contrast)
+// 4. Get text color for background (for contrast)
 export function getTextColorForBackground(bgColor: string): string {
-  // Simple luminance check for #RRGGBB or rgb()
+  // Supports #RRGGBB and rgb() formats only.
   let r = 0, g = 0, b = 0;
   if (bgColor.startsWith('#')) {
     const hex = bgColor.replace('#', '');
@@ -60,7 +64,7 @@ export function getTextColorForBackground(bgColor: string): string {
   return brightness < 128 ? '#fff' : '#000';
 }
 
-// 6. EdgeInsets helpers (web fallback)
+// 5. EdgeInsets helpers (web fallback)
 export interface EdgeInsets {
   top: number;
   right: number;
@@ -85,6 +89,7 @@ export function getNotch(position: number, range: number): number {
   // Returns the closest notch index for a given position and range
   // NOTCHES is 6 in your constants
   const NOTCHES = 6;
+  if (range === 0) return 0;
   if (position < -range) return 0;
   if (position > range) return NOTCHES;
   const progress = Math.round(((position + range) / (range * 2)) * NOTCHES);
@@ -94,6 +99,7 @@ export function getNotch(position: number, range: number): number {
 export function getSnappedPartition(notch: number, range: number): number {
   // Returns the partition value for a given notch index and range
   const NOTCHES = 6;
+  if (range === 0) return 0;
   const p = (notch / NOTCHES) * range * 2 - range;
   return p;
 }
@@ -103,7 +109,8 @@ export function vibrate(intensity: number = 1) {
   // On web, use the Vibration API if available
   if (typeof window !== 'undefined' && 'vibrate' in window.navigator) {
     // Map intensity to duration (arbitrary mapping)
-    const duration = Math.max(10, Math.min(100, Math.round(intensity * 50)));
+    const safeIntensity = Math.max(0, intensity);
+    const duration = Math.max(10, Math.min(100, Math.round(safeIntensity * 50)));
     window.navigator.vibrate(duration);
   }
 } 

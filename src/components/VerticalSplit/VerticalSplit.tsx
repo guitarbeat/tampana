@@ -1,42 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { SplitDetent, SplitDetentHelpers } from './SplitDetent';
 import { TopWrapper, BottomWrapper } from './Wrappers';
-import { LeadingAccessories, TrailingAccessories, MenuAccessories, SplitAccessory, MenuAccessory } from './Accessories';
 import {
-  getNotch,
-  getSnappedPartition,
-  vibrate,
-  getScreenSize
+  scaleDownButtonStyle
 } from './helpers';
 
-// Constants matching the SwiftUI implementation
-const SPACING = 36;
-const LIL = 58;
-const LIL2 = LIL * 3 / 2;
-const LIL3 = LIL * 2;
-const NOTCHES = 6;
-const MIN_PANEL_HEIGHT = 100;
+// Constants
+const DIVIDER_HEIGHT = 10;
 
-// Interface for the VerticalSplit component props
-interface VerticalSplitProps {
-  topView: React.ReactNode;
-  bottomView: React.ReactNode;
-  topViewOverlay?: React.ReactNode;
-  bottomViewOverlay?: React.ReactNode;
-  autoTopOverlay?: boolean;
-  autoBottomOverlay?: boolean;
-  topTitle?: string;
-  bottomTitle?: string;
-  initialDetent?: SplitDetent;
-  bgColor?: string;
-  leadingAccessories?: SplitAccessory[];
-  trailingAccessories?: SplitAccessory[];
-  menuAccessories?: MenuAccessory[];
-  menuSymbol?: React.ReactNode;
-}
-
-// Styled components for the VerticalSplit
+// Styled components
 const Container = styled.div`
   position: absolute;
   top: 0;
@@ -49,17 +21,13 @@ const Container = styled.div`
   touch-action: none;
   width: 100%;
   height: 100%;
-  /* pointer-events: none; */
   display: flex;
   flex-direction: column;
 `;
 
-// Replace SplitHandle with a Home-indicator style handle
 const HomeIndicatorHandle = styled.div`
-  position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translate(-50%, -50%);
+  position: relative;
+  margin: auto;
   width: 40px;
   height: 5px;
   background: rgba(255,255,255,0.35);
@@ -68,34 +36,108 @@ const HomeIndicatorHandle = styled.div`
   cursor: grab;
   z-index: 20;
   user-select: none;
-  transition: background 0.2s;
+  touch-action: none;
+  ${scaleDownButtonStyle}
+  transition: background 0.15s;
   &:active {
     cursor: grabbing;
-    background: rgba(255,255,255,0.55);
   }
 `;
 
-const ViewButton = styled.button`
-  position: absolute;
-  left: 50%;
-  top: -38px;
-  transform: translateX(-50%);
-  background: #fff;
-  color: #222;
-  font-weight: 700;
-  font-size: 1rem;
-  border: none;
-  border-radius: 22px;
-  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
-  z-index: 30;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  &:hover {
-    background: #f2f2f2;
-    color: #000;
-  }
-`;
+// Panel style objects (default, will be used in the component)
+const defaultTopPanelStyle = {
+  borderTopLeftRadius: 32,
+  borderTopRightRadius: 32,
+  borderBottomLeftRadius: 16,
+  borderBottomRightRadius: 16,
+  overflow: 'hidden',
+  top: 0,
+  position: 'absolute' as const,
+  width: '100%',
+};
 
+const defaultBottomPanelStyle = {
+  borderTopLeftRadius: 16,
+  borderTopRightRadius: 16,
+  borderBottomLeftRadius: 32,
+  borderBottomRightRadius: 32,
+  overflow: 'hidden',
+  position: 'absolute' as const,
+  width: '100%',
+};
+
+// Divider component
+const Divider = ({
+  top,
+  onMouseDown,
+  onTouchStart,
+}: {
+  top: number;
+  onMouseDown: (e: React.MouseEvent) => void;
+  onTouchStart: (e: React.TouchEvent) => void;
+}) => (
+  <div
+    style={{
+      position: 'absolute',
+      left: 0,
+      width: '100%',
+      height: DIVIDER_HEIGHT,
+      top,
+      background: 'black',
+      zIndex: 50,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
+    <HomeIndicatorHandle
+      style={{ position: 'relative', margin: 'auto', zIndex: 100 }}
+      onMouseDown={onMouseDown}
+      onTouchStart={onTouchStart}
+    />
+  </div>
+);
+
+// Interface for the VerticalSplit component props
+interface VerticalSplitProps {
+  topView: React.ReactNode;
+  bottomView: React.ReactNode;
+  topViewOverlay?: React.ReactNode;
+  bottomViewOverlay?: React.ReactNode;
+  bgColor?: string;
+}
+
+// Helper to compute scale (matches Wrappers.tsx)
+function getPanelScale(height: number, containerHeight: number) {
+  const heightRatio = height / containerHeight;
+  return 1 - (1 - heightRatio) * 0.15;
+}
+
+// Given splitY, containerHeight, and divider height, solve for topHeight and bottomHeight
+function getPanelHeights(splitY: number, containerHeight: number, dividerHeight: number) {
+  // We'll solve for topHeight such that:
+  // (containerHeight - bottomHeight * scaleBottom) - (topHeight * scaleTop) = dividerHeight
+  // and topHeight + bottomHeight + dividerHeight <= containerHeight
+  // We'll use a simple iterative approach for accuracy
+  let topHeight = Math.max(0, splitY - dividerHeight / 2);
+  let bottomHeight = Math.max(0, containerHeight - (splitY + dividerHeight / 2));
+
+  // Iteratively adjust topHeight so that the scaled gap is correct
+  for (let i = 0; i < 10; i++) {
+    const scaleTop = getPanelScale(topHeight, containerHeight);
+    const scaleBottom = getPanelScale(bottomHeight, containerHeight);
+    const topPanelBottom = topHeight * scaleTop;
+    const bottomPanelTop = containerHeight - bottomHeight * scaleBottom;
+    const gap = bottomPanelTop - topPanelBottom;
+    const error = gap - dividerHeight;
+    if (Math.abs(error) < 0.5) break;
+    // Adjust topHeight to reduce error
+    topHeight += error * 0.5;
+    topHeight = Math.max(0, Math.min(topHeight, containerHeight - dividerHeight));
+    bottomHeight = containerHeight - topHeight - dividerHeight;
+  }
+  return { topHeight: Math.round(topHeight), bottomHeight: Math.round(bottomHeight) };
+}
 
 /**
  * A container that presents two views stacked vertically with an adjustable split.
@@ -106,28 +148,19 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   bottomView,
   topViewOverlay,
   bottomViewOverlay,
-  autoTopOverlay = true,
-  autoBottomOverlay = true,
-  topTitle = "Top",
-  bottomTitle = "Bottom",
-  initialDetent = SplitDetent.FRACTION_3_6,
-  bgColor = "#ffffff",
-  leadingAccessories = [],
-  trailingAccessories = [],
-  menuAccessories = [],
-  menuSymbol
+  bgColor = "#ffffff"
 }) => {
   // State variables
   const containerRef = useRef<HTMLDivElement>(null);
-  const [splitY, setSplitY] = useState<number>(window.innerHeight / 2);
-  const [isDragging, setIsDragging] = useState(false);
-  const [containerHeight, setContainerHeight] = useState<number>(window.innerHeight);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [splitY, setSplitY] = useState<number>(0);
+  const [containerHeight, setContainerHeight] = useState<number>(0);
 
   // Update container height on resize
   useEffect(() => {
     const updateHeight = () => {
-      setContainerHeight(containerRef.current?.clientHeight || window.innerHeight);
+      const height = containerRef.current?.clientHeight || window.innerHeight;
+      setContainerHeight(height);
+      setSplitY(prev => prev === 0 ? height / 2 : prev);
     };
     updateHeight();
     window.addEventListener('resize', updateHeight);
@@ -136,39 +169,33 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
 
   // Mouse event handlers
   const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setIsAnimating(false);
+    e.preventDefault();
     const startY = e.clientY;
     const startSplitY = splitY;
-
     const onMouseMove = (moveEvent: MouseEvent) => {
+      moveEvent.preventDefault();
       if (!containerRef.current) return;
       const containerRect = containerRef.current.getBoundingClientRect();
       let newSplitY = startSplitY + (moveEvent.clientY - startY);
-      // Allow dragging all the way to the top or bottom
       newSplitY = Math.max(0, Math.min(containerRect.height, newSplitY));
       setSplitY(newSplitY);
     };
-
-    const onMouseUp = () => {
-      setIsDragging(false);
-      snapToNearestDetent();
+    const onMouseUp = (e: MouseEvent) => {
+      e.preventDefault();
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
     };
-
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   };
 
   // Touch event handlers
   const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true);
-    setIsAnimating(false);
+    e.preventDefault();
     const startY = e.touches[0].clientY;
     const startSplitY = splitY;
-
     const onTouchMove = (moveEvent: TouchEvent) => {
+      moveEvent.preventDefault();
       if (!containerRef.current) return;
       let clientY = moveEvent.touches[0].clientY;
       const containerRect = containerRef.current.getBoundingClientRect();
@@ -176,116 +203,55 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       newSplitY = Math.max(0, Math.min(containerRect.height, newSplitY));
       setSplitY(newSplitY);
     };
-
-    const onTouchEnd = () => {
-      setIsDragging(false);
-      snapToNearestDetent();
+    const onTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
       document.removeEventListener('touchmove', onTouchMove as any);
       document.removeEventListener('touchend', onTouchEnd as any);
     };
-
     document.addEventListener('touchmove', onTouchMove as any, { passive: false });
     document.addEventListener('touchend', onTouchEnd as any);
   };
 
-  // Snapping logic
-  const snapToNearestDetent = () => {
-    if (!containerRef.current) return;
-    const threshold = 48; // px, for full-screen snap and detent snap
-    const range = (containerHeight / 2) - MIN_PANEL_HEIGHT;
-    // Convert splitY to partition (centered at 0)
-    const partition = splitY - containerHeight / 2;
-    // Snap to top (show only bottom)
-    if (splitY <= threshold) {
-      setIsAnimating(true);
-      setSplitY(0);
-      vibrate(0.5);
-      setTimeout(() => setIsAnimating(false), 350);
-      return;
-    }
-    // Snap to bottom (show only top)
-    if (splitY >= containerHeight - threshold) {
-      setIsAnimating(true);
-      setSplitY(containerHeight);
-      vibrate(0.5);
-      setTimeout(() => setIsAnimating(false), 350);
-      return;
-    }
-    // Otherwise, only snap to a detent if within threshold
-    let closestDetent = null;
-    let closestDist = Infinity;
-    let snappedSplitY = splitY;
-    for (let notch = 0; notch <= NOTCHES; notch++) {
-      const snappedPartition = getSnappedPartition(notch, range);
-      const detentSplitY = snappedPartition + containerHeight / 2;
-      const dist = Math.abs(splitY - detentSplitY);
-      if (dist < closestDist) {
-        closestDist = dist;
-        closestDetent = detentSplitY;
-      }
-    }
-    if (closestDist <= threshold) {
-      setIsAnimating(true);
-      setSplitY(closestDetent);
-      vibrate(0.5);
-      setTimeout(() => setIsAnimating(false), 350);
-      return;
-    }
-    // Otherwise, stay at released position
-    setIsAnimating(false);
+  // Panel heights with fixed divider and scaling-aware gap
+  const { topHeight, bottomHeight } = getPanelHeights(splitY, containerHeight, DIVIDER_HEIGHT);
+
+  // Merge default panel styles with dynamic values
+  const topPanelStyle = {
+    ...defaultTopPanelStyle,
+    backgroundColor: bgColor,
+  };
+  const bottomPanelStyle = {
+    ...defaultBottomPanelStyle,
+    backgroundColor: bgColor,
+    top: splitY + DIVIDER_HEIGHT / 2,
   };
 
-  // Panel heights
-  const topHeight = splitY;
-  const bottomHeight = containerHeight - splitY;
-
-  // Blur logic: never blur unless hidden
-  const getTopMinimise = () => 0;
-  const getBottomMinimise = () => 0;
-  const isAccessoriesPill = false;
-
   return (
-    <Container ref={containerRef}>
-      <TopWrapper
-        minimise={getTopMinimise()}
-        overscroll={0}
-        isFull={false}
-        isShowingAccessories={isAccessoriesPill}
-        bgColor={bgColor}
-        content={topView}
-        overlay={null}
-        style={{
-          height: topHeight,
-          zIndex: 1,
-          transition: isAnimating ? 'height 0.35s cubic-bezier(0.4,0.2,0.2,1)' : undefined
-        }}
-      />
-
-      <HomeIndicatorHandle
-        style={{
-          top: topHeight - 2.5,
-          display: 'flex',
-          zIndex: 100,
-          transition: isAnimating ? 'top 0.35s cubic-bezier(0.4,0.2,0.2,1)' : undefined
-        }}
+    <Container ref={containerRef} style={{ backgroundColor: '#000' }}>
+      {topHeight > 1 && (
+        <TopWrapper
+          height={topHeight}
+          containerHeight={containerHeight}
+          style={topPanelStyle}
+        >
+          {topView}
+          {topViewOverlay}
+        </TopWrapper>
+      )}
+      <Divider
+        top={splitY - DIVIDER_HEIGHT / 2}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
       />
-
-      <BottomWrapper
-        minimise={getBottomMinimise()}
-        overscroll={0}
-        isFull={false}
-        isShowingAccessories={isAccessoriesPill}
-        bgColor={bgColor}
-        content={bottomView}
-        overlay={null}
-        style={{
-          height: bottomHeight,
-          zIndex: 1,
-          transition: isAnimating ? 'height 0.35s cubic-bezier(0.4,0.2,0.2,1)' : undefined
-        }}
-      />
+      {bottomHeight > 1 && (
+        <BottomWrapper
+          height={bottomHeight}
+          containerHeight={containerHeight}
+          style={bottomPanelStyle}
+        >
+          {bottomViewOverlay ? bottomViewOverlay : bottomView}
+        </BottomWrapper>
+      )}
     </Container>
   );
 };

@@ -1,10 +1,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import deadFile from 'vite-plugin-deadfile'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    deadFile({
+      root: 'src',
+      output: 'dead-files.txt',
+      throwWhenFound: false
+    })
+  ],
   server: {
     host: '0.0.0.0',
     port: 3000,
