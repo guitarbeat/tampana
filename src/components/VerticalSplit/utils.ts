@@ -1,7 +1,14 @@
-// Helpers for VerticalSplit (React/TypeScript version)
 import { css } from 'styled-components';
 
-// 1. Button scale down style (for press feedback)
+// Types
+export interface EdgeInsets {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+// Styled component helpers
 export const scaleDownButtonStyle = css`
   transition: opacity 0.2s, transform 0.2s;
   &:active {
@@ -11,22 +18,18 @@ export const scaleDownButtonStyle = css`
   }
 `;
 
-// 2. Blur transition helper (for CSS transitions)
 export const blurTransition = (radius: number = 4) => css`
   filter: blur(${radius}px);
   transition: filter 0.3s;
 `;
 
-// 3. Get safe area insets (web fallback)
+// Safe area helpers
 export function getSafeAreaInsets() {
-  // Try CSS env variables, fallback to 0
   const getEnv = (name: string): number => {
     if (typeof window !== 'undefined') {
-      // Try both env() and --
       let value = getComputedStyle(document.documentElement).getPropertyValue(`env(${name})`);
       if (!value) value = getComputedStyle(document.documentElement).getPropertyValue(`--${name}`);
       if (value) {
-        // Remove units and whitespace, parse as float
         const num = parseFloat(value.trim());
         return isNaN(num) ? 0 : num;
       }
@@ -41,9 +44,8 @@ export function getSafeAreaInsets() {
   };
 }
 
-// 4. Get text color for background (for contrast)
+// Color helpers
 export function getTextColorForBackground(bgColor: string): string {
-  // Supports #RRGGBB and rgb() formats only.
   let r = 0, g = 0, b = 0;
   if (bgColor.startsWith('#')) {
     const hex = bgColor.replace('#', '');
@@ -64,14 +66,7 @@ export function getTextColorForBackground(bgColor: string): string {
   return brightness < 128 ? '#fff' : '#000';
 }
 
-// 5. EdgeInsets helpers (web fallback)
-export interface EdgeInsets {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-}
-
+// Edge insets helpers
 export function getVerticalInsets(insets: EdgeInsets): number {
   return insets.top + insets.bottom;
 }
@@ -84,10 +79,8 @@ export function getSmartBottom(insets: EdgeInsets): number {
   return insets.bottom === 0 ? 16 : insets.bottom;
 }
 
-// Notch calculation helpers (ported from Swift)
+// Notch calculation helpers
 export function getNotch(position: number, range: number): number {
-  // Returns the closest notch index for a given position and range
-  // NOTCHES is 6 in your constants
   const NOTCHES = 6;
   if (range === 0) return 0;
   if (position < -range) return 0;
@@ -97,20 +90,43 @@ export function getNotch(position: number, range: number): number {
 }
 
 export function getSnappedPartition(notch: number, range: number): number {
-  // Returns the partition value for a given notch index and range
   const NOTCHES = 6;
   if (range === 0) return 0;
   const p = (notch / NOTCHES) * range * 2 - range;
   return p;
 }
 
-// Haptic feedback (vibrate) helper
+// Haptic feedback helper
 export function vibrate(intensity: number = 1) {
-  // On web, use the Vibration API if available
   if (typeof window !== 'undefined' && 'vibrate' in window.navigator) {
-    // Map intensity to duration (arbitrary mapping)
     const safeIntensity = Math.max(0, intensity);
     const duration = Math.max(10, Math.min(100, Math.round(safeIntensity * 50)));
     window.navigator.vibrate(duration);
   }
+}
+
+// Panel scale helper
+export function getPanelScale(height: number, containerHeight: number) {
+  const heightRatio = height / containerHeight;
+  return 1 - (1 - heightRatio) * 0.15;
+}
+
+// Panel height calculation helper
+export function getPanelHeights(splitY: number, containerHeight: number, dividerHeight: number) {
+  let topHeight = Math.max(0, splitY - dividerHeight / 2);
+  let bottomHeight = Math.max(0, containerHeight - (splitY + dividerHeight / 2));
+
+  for (let i = 0; i < 10; i++) {
+    const scaleTop = getPanelScale(topHeight, containerHeight);
+    const scaleBottom = getPanelScale(bottomHeight, containerHeight);
+    const topPanelBottom = topHeight * scaleTop;
+    const bottomPanelTop = containerHeight - bottomHeight * scaleBottom;
+    const gap = bottomPanelTop - topPanelBottom;
+    const error = gap - dividerHeight;
+    if (Math.abs(error) < 0.5) break;
+    topHeight += error * 0.5;
+    topHeight = Math.max(0, Math.min(topHeight, containerHeight - dividerHeight));
+    bottomHeight = containerHeight - topHeight - dividerHeight;
+  }
+  return { topHeight: Math.round(topHeight), bottomHeight: Math.round(bottomHeight) };
 } 
