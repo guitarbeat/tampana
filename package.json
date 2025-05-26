@@ -16,6 +16,7 @@
     "@fullcalendar/react": "^6.1.17",
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
+    "@vfx-js/core": "^0.6.0",
     "date-fns": "^2.30.0",
     "firebase": "^10.8.0",
     "gsap": "^3.13.0",
@@ -26,7 +27,8 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
     "react-grid-layout": "^1.5.1",
-    "styled-components": "^6.1.18"
+    "styled-components": "^6.1.18",
+    "vue-cal": "^5.0.1-rc.25"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

@@ -142,7 +142,7 @@ const Panel = styled.div<{ $height: number; $backgroundColor: string }>`
   height: ${props => props.$height}px;
   background: ${props => props.$backgroundColor};
   border-radius: 32px;
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
 `;
 
@@ -228,8 +228,6 @@ const Divider = ({
         justifyContent: 'center',
         cursor: 'grab',
       }}
-      onMouseDown={onMouseDown}
-      onTouchStart={onTouchStart}
     >
       <div style={{ 
         display: 'flex', 
@@ -258,15 +256,20 @@ const Divider = ({
           </AccessoriesContainer>
         )}
         
-        {/* Center handle */}
-        <HomeIndicatorHandle
-          style={{ 
-            position: 'relative', 
-            margin: 'auto', 
+        {/* Center handle - this is the draggable area */}
+        <div
+          style={{
+            position: 'relative',
+            margin: 'auto',
             zIndex: 100,
-            pointerEvents: 'none' // Prevent double event handling
+            padding: '10px 20px', // Larger touch target
+            cursor: 'grab',
           }}
-        />
+          onMouseDown={onMouseDown}
+          onTouchStart={onTouchStart}
+        >
+          <HomeIndicatorHandle />
+        </div>
         
         {/* Trailing accessories */}
         <AccessoriesContainer>

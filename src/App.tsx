@@ -1,6 +1,8 @@
 import ReactDOM from 'react-dom/client';
 import VerticalSplit from './components/VerticalSplit/VerticalSplit';
+import EmojiGridMapper from './components/EmojiGridMapper';
 import styled, { createGlobalStyle } from 'styled-components';
+import './index.css';
 
 const GlobalStyle = createGlobalStyle`
   @tailwind base;
@@ -45,7 +47,26 @@ const CenteredNumber = styled.div`
   font-weight: bold;
 `;
 
+const EmojiContainer = styled.div`
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+`;
+
 function App() {
+  const handleEmojiSelect = (emoji: any) => {
+    // You can add your emoji handling logic here
+    // Example: setCurrentEmotion(emoji.emotion);
+  };
+
+  const handleGridChange = (grid: any) => {
+    // You can add your grid change handling logic here
+    // Example: saveGridState(grid);
+  };
+
   return (
     <>
       <GlobalStyle />
@@ -57,9 +78,12 @@ function App() {
             </Panel>
           }
           bottomView={
-            <Panel>
-              <CenteredNumber>2</CenteredNumber>
-            </Panel>
+            <EmojiContainer>
+              <EmojiGridMapper 
+                onEmojiSelect={handleEmojiSelect} 
+                onGridChange={handleGridChange}
+              />
+            </EmojiContainer>
           }
           bgColor="#1a1a1a"
           leadingAccessories={[
@@ -69,7 +93,7 @@ function App() {
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
               ),
-              onClick: () => console.log('Star clicked!'),
+              onClick: () => {/* Handle star click */},
               color: '#FFD700'
             },
             {
@@ -78,7 +102,7 @@ function App() {
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
               ),
-              onClick: () => console.log('Heart clicked!'),
+              onClick: () => {/* Handle heart click */},
               color: '#FF6B6B'
             }
           ]}
@@ -89,7 +113,7 @@ function App() {
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
               ),
-              onClick: () => console.log('Check clicked!'),
+              onClick: () => {/* Handle check click */},
               color: '#4ECDC4'
             }
           ]}
@@ -101,7 +125,7 @@ function App() {
                 </svg>
               ),
               label: 'Add New Item',
-              onClick: () => console.log('Add new item clicked!'),
+              onClick: () => {/* Handle add new item */},
               color: '#4ECDC4'
             },
             {
@@ -111,7 +135,7 @@ function App() {
                 </svg>
               ),
               label: 'Remove Item',
-              onClick: () => console.log('Remove item clicked!'),
+              onClick: () => {/* Handle remove item */},
               color: '#FF6B6B'
             },
             {
@@ -121,7 +145,7 @@ function App() {
                 </svg>
               ),
               label: 'Mark as Favorite',
-              onClick: () => console.log('Mark as favorite clicked!'),
+              onClick: () => {/* Handle mark as favorite */},
               color: '#FFD700'
             }
           ]}
