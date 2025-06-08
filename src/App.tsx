@@ -1,8 +1,10 @@
 import ReactDOM from 'react-dom/client';
 import VerticalSplit from './components/VerticalSplit/VerticalSplit';
 import EmojiGridMapper from './components/EmojiGridMapper';
+import EmotionalCalendar from './components/EmotionalCalendar';
 import styled, { createGlobalStyle } from 'styled-components';
 import './index.css';
+import './styles/emotional-calendar.css';
 
 const GlobalStyle = createGlobalStyle`
   @tailwind base;
@@ -37,9 +39,10 @@ const AppContainer = styled.div`
 const Panel = styled.div`
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   background: #1a1a1a;
+  height: 100%;
+  width: 100%;
 `;
 
 const CenteredNumber = styled.div`
@@ -74,7 +77,7 @@ function App() {
         <VerticalSplit
           topView={
             <Panel>
-              <CenteredNumber>1</CenteredNumber>
+              <EmotionalCalendar />
             </Panel>
           }
           bottomView={
@@ -124,8 +127,8 @@ function App() {
                   <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                 </svg>
               ),
-              label: 'Add New Item',
-              onClick: () => {/* Handle add new item */},
+              label: 'Add New Event',
+              onClick: () => {/* Handle add new event */},
               color: '#4ECDC4'
             },
             {
@@ -134,8 +137,8 @@ function App() {
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z" />
                 </svg>
               ),
-              label: 'Remove Item',
-              onClick: () => {/* Handle remove item */},
+              label: 'Remove Event',
+              onClick: () => {/* Handle remove event */},
               color: '#FF6B6B'
             },
             {

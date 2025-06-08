@@ -28,6 +28,7 @@
     "react-dom": "^18.2.0",
     "react-grid-layout": "^1.5.1",
     "styled-components": "^6.1.18",
+    "veaury": "^2.6.2",
     "vue-cal": "^5.0.1-rc.25"
   },
   "devDependencies": {

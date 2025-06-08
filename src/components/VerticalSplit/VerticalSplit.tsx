@@ -1,11 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { scaleDownButtonStyle } from './utils';
+import { scaleDownButtonStyle, vibrate, getPanelScale } from './utils';
 
 // Constants
 const DIVIDER_HEIGHT = 20;
 const ACCESSORY_SIZE = 24;
 const ACCESSORY_SPACING = 8;
+const EDGE_RESISTANCE_THRESHOLD = 50; // pixels from edge
+const EDGE_RESISTANCE_FACTOR = 0.75; // movement multiplier
+const HAPTIC_THRESHOLD = 10; // pixels of overscroll to trigger haptic
+const MINIMIZE_SCALE_THRESHOLD = 100; // pixels from edge to start scaling
 
 // Types for accessories
 interface SplitAccessory {
@@ -134,7 +138,7 @@ const MenuItem = styled.button<{ $color?: string }>`
 `;
 
 // Panel styled components
-const Panel = styled.div<{ $height: number; $backgroundColor: string }>`
+const Panel = styled.div<{ $height: number; $backgroundColor: string; $scale?: number }>`
   position: absolute;
   left: 0;
   right: 0;
@@ -142,33 +146,61 @@ const Panel = styled.div<{ $height: number; $backgroundColor: string }>`
   height: ${props => props.$height}px;
   background: ${props => props.$backgroundColor};
   border-radius: 32px;
-  overflow: visible;
+  overflow: hidden;
   box-sizing: border-box;
+  transform: scale(${props => props.$scale || 1});
+  transform-origin: ${props => props.$scale && props.$scale < 1 ? 'center top' : 'center center'};
+  transition: transform 0.2s ease-out;
 `;
 
 const TopPanel = styled(Panel)`
   top: 0;
-  border-bottom-left-radius: 16px;
-  border-bottom-right-radius: 16px;
 `;
 
-const BottomPanel = styled(Panel)<{ $top: number }>`
+const BottomPanel = styled(Panel)<{ $top: number; $scale?: number }>`
   top: ${props => props.$top}px;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
 `;
 
 const ContentContainer = styled.div`
   height: 100%;
   width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow-y: auto;
+  flex-direction: column;
+  overflow: auto;
   position: relative;
   box-sizing: border-box;
-  scrollbar-width: none; /* Firefox */
-  &::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+  border-radius: 32px;
+  padding: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+  
+  /* Custom scrollbar for webkit browsers */
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+    margin: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.25));
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 `;
 
 // Divider component with accessories
@@ -429,11 +461,36 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       if (!containerRef.current) return;
       
       const containerRect = containerRef.current.getBoundingClientRect();
-      const relativeSplitY = startSplitY + (moveEvent.clientY - startY);
+      let relativeSplitY = startSplitY + (moveEvent.clientY - startY);
       
-      // Use dynamic constraints based on actual container height
-      const minSplit = Math.max(50, containerRect.height * 0.1);
-      const maxSplit = Math.min(containerRect.height - 50, containerRect.height * 0.9);
+      // Calculate resistance based on position
+      let resistanceFactor = 1;
+      
+      // Edge resistance only
+      if (relativeSplitY < EDGE_RESISTANCE_THRESHOLD) {
+        const edgeProgress = relativeSplitY / EDGE_RESISTANCE_THRESHOLD;
+        resistanceFactor = EDGE_RESISTANCE_FACTOR + (1 - EDGE_RESISTANCE_FACTOR) * edgeProgress;
+        
+        // Trigger haptic feedback on overscroll
+        if (relativeSplitY < 0) {
+          vibrate(Math.min(1, Math.abs(relativeSplitY) / HAPTIC_THRESHOLD));
+        }
+      } else if (relativeSplitY > containerRect.height - EDGE_RESISTANCE_THRESHOLD) {
+        const edgeProgress = (containerRect.height - relativeSplitY) / EDGE_RESISTANCE_THRESHOLD;
+        resistanceFactor = EDGE_RESISTANCE_FACTOR + (1 - EDGE_RESISTANCE_FACTOR) * edgeProgress;
+        
+        // Trigger haptic feedback on overscroll
+        if (relativeSplitY > containerRect.height) {
+          vibrate(Math.min(1, (relativeSplitY - containerRect.height) / HAPTIC_THRESHOLD));
+        }
+      }
+      
+      // Apply resistance to movement
+      relativeSplitY = startSplitY + (moveEvent.clientY - startY) * resistanceFactor;
+      
+      // Allow full minimization by removing minimum constraints
+      const minSplit = 0;
+      const maxSplit = containerRect.height;
       const newSplitY = Math.max(minSplit, Math.min(maxSplit, relativeSplitY));
       
       setSplitY(newSplitY);
@@ -465,11 +522,36 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       if (!containerRef.current || !moveEvent.touches[0]) return;
       
       const containerRect = containerRef.current.getBoundingClientRect();
-      const relativeSplitY = startSplitY + (moveEvent.touches[0].clientY - startY);
+      let relativeSplitY = startSplitY + (moveEvent.touches[0].clientY - startY);
       
-      // Use dynamic constraints based on actual container height
-      const minSplit = Math.max(50, containerRect.height * 0.1);
-      const maxSplit = Math.min(containerRect.height - 50, containerRect.height * 0.9);
+      // Calculate resistance based on position
+      let resistanceFactor = 1;
+      
+      // Edge resistance only
+      if (relativeSplitY < EDGE_RESISTANCE_THRESHOLD) {
+        const edgeProgress = relativeSplitY / EDGE_RESISTANCE_THRESHOLD;
+        resistanceFactor = EDGE_RESISTANCE_FACTOR + (1 - EDGE_RESISTANCE_FACTOR) * edgeProgress;
+        
+        // Trigger haptic feedback on overscroll
+        if (relativeSplitY < 0) {
+          vibrate(Math.min(1, Math.abs(relativeSplitY) / HAPTIC_THRESHOLD));
+        }
+      } else if (relativeSplitY > containerRect.height - EDGE_RESISTANCE_THRESHOLD) {
+        const edgeProgress = (containerRect.height - relativeSplitY) / EDGE_RESISTANCE_THRESHOLD;
+        resistanceFactor = EDGE_RESISTANCE_FACTOR + (1 - EDGE_RESISTANCE_FACTOR) * edgeProgress;
+        
+        // Trigger haptic feedback on overscroll
+        if (relativeSplitY > containerRect.height) {
+          vibrate(Math.min(1, (relativeSplitY - containerRect.height) / HAPTIC_THRESHOLD));
+        }
+      }
+      
+      // Apply resistance to movement
+      relativeSplitY = startSplitY + (moveEvent.touches[0].clientY - startY) * resistanceFactor;
+      
+      // Allow full minimization by removing minimum constraints
+      const minSplit = 0;
+      const maxSplit = containerRect.height;
       const newSplitY = Math.max(minSplit, Math.min(maxSplit, relativeSplitY));
       
       setSplitY(newSplitY);
@@ -484,10 +566,18 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
     document.addEventListener('touchend', onTouchEnd as any);
   };
 
-  // Calculate panel heights - simplified logic
+  // Calculate panel heights and scales
   const topHeight = Math.max(0, splitY - DIVIDER_HEIGHT / 2);
   const bottomHeight = Math.max(0, containerHeight - splitY - DIVIDER_HEIGHT / 2);
   const bottomTop = splitY + DIVIDER_HEIGHT / 2;
+
+  // Calculate scale factors for minimizing effect
+  const topScale = topHeight < MINIMIZE_SCALE_THRESHOLD 
+    ? getPanelScale(topHeight, MINIMIZE_SCALE_THRESHOLD) 
+    : 1;
+  const bottomScale = bottomHeight < MINIMIZE_SCALE_THRESHOLD 
+    ? getPanelScale(bottomHeight, MINIMIZE_SCALE_THRESHOLD) 
+    : 1;
 
   // Don't render panels until we have proper dimensions and initialization
   if (!isInitialized || containerHeight === 0) {
@@ -496,15 +586,17 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
 
   return (
     <Container ref={containerRef} style={{ backgroundColor: '#000' }}>
-      {/* Top Panel */}
-      {topHeight > 10 && (
-        <TopPanel $height={topHeight} $backgroundColor={bgColor}>
-          <ContentContainer>
-            {topView}
-            {topViewOverlay}
-          </ContentContainer>
-        </TopPanel>
-      )}
+      {/* Top Panel - render even at 0 height */}
+      <TopPanel 
+        $height={topHeight} 
+        $backgroundColor={bgColor}
+        $scale={topScale}
+      >
+        <ContentContainer>
+          {topView}
+          {topViewOverlay}
+        </ContentContainer>
+      </TopPanel>
       
       {/* Divider with accessories */}
       <Divider
@@ -518,18 +610,17 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         menuColor={menuColor}
       />
       
-      {/* Bottom Panel */}
-      {bottomHeight > 10 && (
-        <BottomPanel 
-          $height={bottomHeight} 
-          $backgroundColor={bgColor}
-          $top={bottomTop}
-        >
-          <ContentContainer>
-            {bottomViewOverlay ? bottomViewOverlay : bottomView}
-          </ContentContainer>
-        </BottomPanel>
-      )}
+      {/* Bottom Panel - render even at 0 height */}
+      <BottomPanel 
+        $height={bottomHeight} 
+        $backgroundColor={bgColor}
+        $top={bottomTop}
+        $scale={bottomScale}
+      >
+        <ContentContainer>
+          {bottomViewOverlay ? bottomViewOverlay : bottomView}
+        </ContentContainer>
+      </BottomPanel>
     </Container>
   );
 };
