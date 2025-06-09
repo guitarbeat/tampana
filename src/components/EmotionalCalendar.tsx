@@ -136,7 +136,7 @@ const EmotionalCalendar: React.FC = () => {
   }, []);
 
   const handleViewChange = useCallback((view: any) => {
-    console.log('View changed:', view.start, view.end);
+    // TODO: Add any view change handling logic here
   }, []);
 
   const handleEventClick = useCallback((event: any) => {
