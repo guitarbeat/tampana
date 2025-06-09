@@ -1,1 +1,5 @@
 node_modules
+dist/
+.DS_Store
+src/dead-files.txt
+vite.config.ts.timestamp-*

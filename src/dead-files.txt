@@ -1,5 +1,0 @@
-[vite-plugin-deadfile]:
-  All source files: 7
-  Used source files: 6
-  Unused source files: 1
-    ./dead-files.txt
