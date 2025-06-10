@@ -1,19 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import VueCalWrapper from './VueCalWrapper';
 import styled from 'styled-components';
-
-interface EmotionalEvent {
-  id: string;
-  title: string;
-  start: Date;
-  end: Date;
-  emotion: string;
-  emoji: string;
-  class?: string;
-  background?: boolean;
-  split?: number;
-  allDay?: boolean;
-}
+import { EventData } from '../types/event-data';
 
 const CalendarContainer = styled.div`
   height: 100%;
@@ -47,7 +35,7 @@ const AccessoryButton = styled.button<{ $active?: boolean }>`
 `;
 
 const EmotionalCalendar: React.FC = () => {
-  const [events, setEvents] = useState<EmotionalEvent[]>(() => {
+  const [events, setEvents] = useState<EventData[]>(() => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
@@ -111,17 +99,17 @@ const EmotionalCalendar: React.FC = () => {
   });
 
   const [showWeekends, setShowWeekends] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<EmotionalEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
   const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>('day');
-  const calendarRef = useRef<any>(null);
+  const calendarRef = useRef<HTMLElement | null>(null);
 
   const [showAllDayEvents, setShowAllDayEvents] = useState(false);
   const [showCurrentTime, setShowCurrentTime] = useState(true);
   const [timeFormat, setTimeFormat] = useState<'12h' | '24h'>('24h');
   const [showEventTimes, setShowEventTimes] = useState(true);
 
-  const handleEventCreate = useCallback((event: any) => {
-    const newEvent: EmotionalEvent = {
+  const handleEventCreate = useCallback((event: EventData) => {
+    const newEvent: EventData = {
       id: Date.now().toString(),
       start: event.start,
       end: event.end,
@@ -139,7 +127,7 @@ const EmotionalCalendar: React.FC = () => {
     // TODO: Add any view change handling logic here
   }, []);
 
-  const handleEventClick = useCallback((event: any) => {
+  const handleEventClick = useCallback((event: EventData) => {
     setSelectedEvent(event);
     // Add tagged class for animation
     const eventElement = document.querySelector(`[data-event-id="${event.id}"]`);
@@ -346,7 +334,7 @@ const EmotionalCalendar: React.FC = () => {
         dragToCreateThreshold={15}
         resizeX={false}
         resizeY={true}
-        eventContent={({ event }: { event: EmotionalEvent }) => (
+        eventContent={({ event }: { event: EventData }) => (
           <div className="event-content" style={{
             display: 'flex',
             alignItems: 'center',
