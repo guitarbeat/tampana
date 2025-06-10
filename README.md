@@ -21,6 +21,14 @@ To create a production build in the `dist/` directory run:
 npm run build
 ```
 
+## Testing
+
+Run unit tests with Jest:
+
+```bash
+npm test
+```
+
 ## Features
 
 - **Emotion Calendar** – schedule events and tag them with emotions.

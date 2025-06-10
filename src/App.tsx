@@ -1,4 +1,3 @@
-import ReactDOM from 'react-dom/client';
 import VerticalSplit from './components/VerticalSplit/VerticalSplit';
 import EmojiGridMapper from './components/EmojiGridMapper';
 import EmotionalCalendar from './components/EmotionalCalendar';
@@ -163,8 +162,5 @@ function App() {
     </>
   );
 }
-
-// Initialize the app
-ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 
 export default App;
