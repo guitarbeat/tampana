@@ -44,10 +44,7 @@ const Panel = styled.div`
   width: 100%;
 `;
 
-const CenteredNumber = styled.div`
-  font-size: 7rem;
-  font-weight: bold;
-`;
+
 
 const EmojiContainer = styled.div`
   height: 100%;
@@ -59,12 +56,12 @@ const EmojiContainer = styled.div`
 `;
 
 function App() {
-  const handleEmojiSelect = (emoji: any) => {
+  const handleEmojiSelect = (_emoji: any) => {
     // You can add your emoji handling logic here
     // Example: setCurrentEmotion(emoji.emotion);
   };
 
-  const handleGridChange = (grid: any) => {
+  const handleGridChange = (_grid: any) => {
     // You can add your grid change handling logic here
     // Example: saveGridState(grid);
   };
