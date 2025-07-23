@@ -1,7 +1,9 @@
 import VerticalSplit from './components/VerticalSplit/VerticalSplit';
 import EmojiGridMapper from './components/EmojiGridMapper';
 import EmotionalCalendar from './components/EmotionalCalendar';
+import DataExport from './components/DataExport';
 import styled, { createGlobalStyle } from 'styled-components';
+import { useState } from 'react';
 import './index.css';
 import './styles/emotional-calendar.css';
 
@@ -56,6 +58,8 @@ const EmojiContainer = styled.div`
 `;
 
 function App() {
+  const [events, setEvents] = useState<any[]>([]);
+
   const handleEmojiSelect = (_emoji: any) => {
     // You can add your emoji handling logic here
     // Example: setCurrentEmotion(emoji.emotion);
@@ -66,14 +70,19 @@ function App() {
     // Example: saveGridState(grid);
   };
 
+  const handleEventsUpdate = (newEvents: any[]) => {
+    setEvents(newEvents);
+  };
+
   return (
     <>
       <GlobalStyle />
       <AppContainer>
+        <DataExport events={events} />
         <VerticalSplit
           topView={
             <Panel>
-              <EmotionalCalendar />
+              <EmotionalCalendar onEventsUpdate={handleEventsUpdate} />
             </Panel>
           }
           bottomView={

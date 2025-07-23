@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import VueCalWrapper from './VueCalWrapper';
 import styled from 'styled-components';
 import { EventData } from '../types/event-data';
@@ -13,11 +13,11 @@ const CalendarContainer = styled.div`
   position: relative;
 `;
 
+interface EmotionalCalendarProps {
+  onEventsUpdate?: (events: EventData[]) => void;
+}
 
-
-
-
-const EmotionalCalendar: React.FC = () => {
+const EmotionalCalendar: React.FC<EmotionalCalendarProps> = ({ onEventsUpdate }) => {
   const [events, setEvents] = useState<EventData[]>(() => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -103,8 +103,22 @@ const EmotionalCalendar: React.FC = () => {
       background: false,
       allDay: false
     };
-    setEvents(prev => [...prev, newEvent]);
+    setEvents(prev => {
+      const updatedEvents = [...prev, newEvent];
+      onEventsUpdate?.(updatedEvents);
+      return updatedEvents;
+    });
+  }, [onEventsUpdate]);
+
+  // Call onEventsUpdate when component mounts with initial events
+  useEffect(() => {
+    onEventsUpdate?.(events);
   }, []);
+
+  // Call onEventsUpdate whenever events change
+  useEffect(() => {
+    onEventsUpdate?.(events);
+  }, [events, onEventsUpdate]);
 
   const handleViewChange = useCallback((view: any) => {
     // Handle view changes - currently just logging for debugging
