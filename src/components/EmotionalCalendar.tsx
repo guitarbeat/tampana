@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import VueCalWrapper from './VueCalWrapper';
+import CalendarControls from './CalendarControls';
+import EventModal from './EventModal';
 import styled from 'styled-components';
 import { EventData } from '../types/event-data';
 
@@ -11,6 +13,11 @@ const CalendarContainer = styled.div`
   background: #1a1a1a;
   color: #fff;
   position: relative;
+`;
+
+const CalendarWrapper = styled.div`
+  flex: 1;
+  overflow: hidden;
 `;
 
 interface EmotionalCalendarProps {
@@ -81,30 +88,64 @@ const EmotionalCalendar: React.FC<EmotionalCalendarProps> = ({ onEventsUpdate })
     ];
   });
 
-  const [showWeekends] = useState(true);
+  // Calendar settings state
+  const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>('day');
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [showWeekends, setShowWeekends] = useState(true);
+  const [showCurrentTime, setShowCurrentTime] = useState(true);
+  const [timeFormat, setTimeFormat] = useState<'12h' | '24h'>('24h');
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
+  const [modalInitialTime, setModalInitialTime] = useState<{ start: Date; end: Date } | undefined>();
 
-  const [currentView] = useState<'day' | 'week' | 'month'>('day');
   const calendarRef = useRef<HTMLElement | null>(null);
 
-  const [showAllDayEvents] = useState(false);
-  const [showCurrentTime] = useState(true);
-  const [timeFormat] = useState<'12h' | '24h'>('24h');
-  const [showEventTimes] = useState(true);
-
   const handleEventCreate = useCallback((event: EventData) => {
-    const newEvent: EventData = {
-      id: Date.now().toString(),
+    setModalInitialTime({
       start: event.start,
-      end: event.end,
-      title: event.title || 'New Event',
-      emotion: 'neutral',
-      emoji: '😐',
-      class: 'emotional-event neutral',
-      background: false,
-      allDay: false
-    };
+      end: event.end
+    });
+    setSelectedEvent(null);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleEventSave = useCallback((eventData: Partial<EventData>) => {
+    if (eventData.id) {
+      // Update existing event
+      setEvents(prev => {
+        const updatedEvents = prev.map(event => 
+          event.id === eventData.id ? { ...event, ...eventData } as EventData : event
+        );
+        onEventsUpdate?.(updatedEvents);
+        return updatedEvents;
+      });
+    } else {
+      // Create new event
+      const newEvent: EventData = {
+        id: Date.now().toString(),
+        title: eventData.title || 'New Event',
+        start: eventData.start!,
+        end: eventData.end!,
+        emotion: eventData.emotion || 'neutral',
+        emoji: eventData.emoji || '😐',
+        class: eventData.class || 'emotional-event neutral',
+        background: false,
+        allDay: false
+      };
+      
+      setEvents(prev => {
+        const updatedEvents = [...prev, newEvent];
+        onEventsUpdate?.(updatedEvents);
+        return updatedEvents;
+      });
+    }
+  }, [onEventsUpdate]);
+
+  const handleEventDelete = useCallback((eventId: string) => {
     setEvents(prev => {
-      const updatedEvents = [...prev, newEvent];
+      const updatedEvents = prev.filter(event => event.id !== eventId);
       onEventsUpdate?.(updatedEvents);
       return updatedEvents;
     });
@@ -120,113 +161,133 @@ const EmotionalCalendar: React.FC<EmotionalCalendarProps> = ({ onEventsUpdate })
     onEventsUpdate?.(events);
   }, [events, onEventsUpdate]);
 
-  const handleViewChange = useCallback((view: any) => {
-    // Handle view changes - currently just logging for debugging
-    console.log('View changed to:', view);
+  const handleViewChange = useCallback((view: 'day' | 'week' | 'month') => {
+    setCurrentView(view);
   }, []);
 
   const handleEventClick = useCallback((event: EventData) => {
-    // Add tagged class for animation
-    const eventElement = document.querySelector(`[data-event-id="${event.id}"]`);
-    if (eventElement) {
-      eventElement.classList.add('tagged');
-      setTimeout(() => {
-        eventElement.classList.remove('tagged');
-      }, 300);
-    }
+    setSelectedEvent(event);
+    setModalInitialTime(undefined);
+    setIsModalOpen(true);
   }, []);
 
+  const handleTodayClick = useCallback(() => {
+    setCurrentDate(new Date());
+  }, []);
 
-
-
-
-
-
-
+  const handleDateChange = useCallback((date: Date) => {
+    setCurrentDate(date);
+  }, []);
 
   return (
     <CalendarContainer>
-      <VueCalWrapper
-        ref={calendarRef}
-        events={events}
-        onEventCreate={handleEventCreate}
+      <CalendarControls
+        currentView={currentView}
         onViewChange={handleViewChange}
-        onEventClick={handleEventClick}
-        editableEvents={true}
-        hideWeekends={!showWeekends}
-        timeFrom={6 * 60}
-        timeTo={22 * 60}
-        viewsBar={false}
-        virtualScroll={false}
-        disableViewTransitions={false}
-        cellHeight={40}
-        cellWidth={120}
-        eventOverlap={true}
-        eventCellClass="emotional-event"
-        defaultView={currentView}
-        style={{ 
-          height: '100%', 
-          width: '100%'
-        }}
-        theme="dark"
-        hideViewSelector={true}
-        hideTitleBar={false}
-        timeCellHeight={40}
-        timeStep={30}
-        timeFormat={timeFormat}
-        showAllDayEvents={showAllDayEvents}
-        showTimeInCells={showEventTimes}
+        showWeekends={showWeekends}
+        onToggleWeekends={setShowWeekends}
         showCurrentTime={showCurrentTime}
-        showCurrentTimeLine={showCurrentTime}
-        currentTimeLineColor="#FF6B6B"
-        currentTimeLineStyle="solid"
-        currentTimeLineWidth={2}
-        currentTimeLineOpacity={0.8}
-        currentTimeLineOffset={0}
-        currentTimeLineZIndex={10}
-        currentTimeLineAnimation={true}
-        currentTimeLineAnimationDuration={2000}
-        currentTimeLineAnimationInterval={60000}
-        snapToTime={15}
-        minEventWidth={80}
-        eventHeight={28}
-        eventMargin={2}
-        eventBorderRadius={8}
-        eventPadding="6px 8px"
-        eventFontSize="0.85em"
-        eventFontWeight={500}
-        eventLetterSpacing="0.3px"
-        eventBoxShadow="0 2px 8px rgba(0, 0, 0, 0.15)"
-        eventTransition="all 0.2s ease"
-        todayButton={false}
-        clickToNavigate={true}
-        dblclickToNavigate={false}
-        dragToCreateEvent={true}
-        dragToCreateThreshold={15}
-        resizeX={false}
-        resizeY={true}
-        eventContent={({ event }: { event: EventData }) => (
-          <div className="event-content" style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: '100%',
-            height: '100%',
-            gap: '6px'
-          }}>
-            <span className="title" style={{
-              flex: 1,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              fontWeight: 500
-            }}>{event.title}</span>
-            <span className="emoji" style={{
-              fontSize: '1.1em',
-              flexShrink: 0
-            }}>{event.emoji}</span>
-          </div>
-        )}
+        onToggleCurrentTime={setShowCurrentTime}
+        timeFormat={timeFormat}
+        onTimeFormatChange={setTimeFormat}
+        currentDate={currentDate}
+        onDateChange={handleDateChange}
+        onTodayClick={handleTodayClick}
+      />
+      
+      <CalendarWrapper>
+        <VueCalWrapper
+          ref={calendarRef}
+          events={events}
+          onEventCreate={handleEventCreate}
+          onViewChange={handleViewChange}
+          onEventClick={handleEventClick}
+          editableEvents={true}
+          hideWeekends={!showWeekends}
+          timeFrom={6 * 60}
+          timeTo={22 * 60}
+          viewsBar={false}
+          virtualScroll={false}
+          disableViewTransitions={false}
+          cellHeight={40}
+          cellWidth={120}
+          eventOverlap={true}
+          eventCellClass="emotional-event"
+          defaultView={currentView}
+          style={{ 
+            height: '100%', 
+            width: '100%'
+          }}
+          theme="dark"
+          hideViewSelector={true}
+          hideTitleBar={true}
+          timeCellHeight={40}
+          timeStep={30}
+          timeFormat={timeFormat}
+          showAllDayEvents={false}
+          showTimeInCells={true}
+          showCurrentTime={showCurrentTime}
+          showCurrentTimeLine={showCurrentTime}
+          currentTimeLineColor="#FF6B6B"
+          currentTimeLineStyle="solid"
+          currentTimeLineWidth={2}
+          currentTimeLineOpacity={0.8}
+          currentTimeLineOffset={0}
+          currentTimeLineZIndex={10}
+          currentTimeLineAnimation={true}
+          currentTimeLineAnimationDuration={2000}
+          currentTimeLineAnimationInterval={60000}
+          snapToTime={15}
+          minEventWidth={80}
+          eventHeight={32}
+          eventMargin={2}
+          eventBorderRadius={8}
+          eventPadding="8px 12px"
+          eventFontSize="0.85em"
+          eventFontWeight={500}
+          eventLetterSpacing="0.3px"
+          eventBoxShadow="0 2px 8px rgba(0, 0, 0, 0.15)"
+          eventTransition="all 0.2s ease"
+          todayButton={false}
+          clickToNavigate={false}
+          dblclickToNavigate={false}
+          dragToCreateEvent={true}
+          dragToCreateThreshold={15}
+          resizeX={false}
+          resizeY={true}
+          eventContent={({ event }: { event: EventData }) => (
+            <div className="event-content" style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+              height: '100%',
+              gap: '8px'
+            }}>
+              <span className="title" style={{
+                flex: 1,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                fontWeight: 500
+              }}>{event.title}</span>
+              <span className="emoji" style={{
+                fontSize: '1.2em',
+                flexShrink: 0
+              }}>{event.emoji}</span>
+            </div>
+          )}
+        />
+      </CalendarWrapper>
+
+      <EventModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleEventSave}
+        onDelete={handleEventDelete}
+        event={selectedEvent}
+        initialDate={currentDate}
+        initialTime={modalInitialTime}
       />
     </CalendarContainer>
   );
