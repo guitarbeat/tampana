@@ -26,6 +26,17 @@ interface EmotionalCalendarProps {
 
 const EmotionalCalendar: React.FC<EmotionalCalendarProps> = ({ onEventsUpdate }) => {
   const [events, setEvents] = useState<EventData[]>(() => {
+    const storedEvents = localStorage.getItem("tampanaEvents");
+    if (storedEvents) {
+      // Parse stored events and convert date strings back to Date objects
+      const parsedEvents = JSON.parse(storedEvents).map((event: any) => ({
+        ...event,
+        start: new Date(event.start),
+        end: new Date(event.end),
+      }));
+      return parsedEvents;
+    }
+
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
@@ -87,6 +98,11 @@ const EmotionalCalendar: React.FC<EmotionalCalendarProps> = ({ onEventsUpdate })
       }
     ];
   });
+
+  // Save events to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("tampanaEvents", JSON.stringify(events));
+  }, [events]);
 
   // Calendar settings state
   const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>('day');
