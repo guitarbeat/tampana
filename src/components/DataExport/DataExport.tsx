@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 import { EventData } from '../../types/event-data';
 
@@ -110,7 +110,7 @@ interface DataExportProps {
   events: EventData[];
 }
 
-const DataExport: React.FC<DataExportProps> = ({ events }) => {
+const DataExport = forwardRef<any, DataExportProps>(({ events }, ref) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
 
@@ -204,6 +204,16 @@ const DataExport: React.FC<DataExportProps> = ({ events }) => {
     setIsDropdownOpen(false);
   };
 
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    handleExport: () => {
+      setIsDropdownOpen(!isDropdownOpen);
+    },
+    handleExportJSON: exportAsJSON,
+    handleExportCSV: exportAsCSV,
+    handleExportSummary: exportEmotionSummary
+  }));
+
   return (
     <>
       <ExportContainer>
@@ -249,7 +259,7 @@ const DataExport: React.FC<DataExportProps> = ({ events }) => {
       </NotificationToast>
     </>
   );
-};
+});
 
 export default DataExport;
 

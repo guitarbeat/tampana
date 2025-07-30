@@ -1,6 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import VueCalWrapper from './VueCalWrapper';
-import CalendarControls from './CalendarControls';
 import EventModal from './EventModal';
 import styled from 'styled-components';
 import { EventData } from '../types/event-data';
@@ -22,9 +21,17 @@ const CalendarWrapper = styled.div`
 
 interface EmotionalCalendarProps {
   onEventsUpdate?: (events: EventData[]) => void;
+  currentView?: 'day' | 'week' | 'month';
+  showWeekends?: boolean;
+  timeFormat?: '12h' | '24h';
 }
 
-const EmotionalCalendar: React.FC<EmotionalCalendarProps> = ({ onEventsUpdate }) => {
+const EmotionalCalendar = forwardRef<any, EmotionalCalendarProps>(({ 
+  onEventsUpdate,
+  currentView: externalCurrentView = 'day',
+  showWeekends: externalShowWeekends = true,
+  timeFormat: externalTimeFormat = '24h'
+}, ref) => {
   const [events, setEvents] = useState<EventData[]>(() => {
     const storedEvents = localStorage.getItem("tampanaEvents");
     if (storedEvents) {
@@ -104,12 +111,12 @@ const EmotionalCalendar: React.FC<EmotionalCalendarProps> = ({ onEventsUpdate })
     localStorage.setItem("tampanaEvents", JSON.stringify(events));
   }, [events]);
 
-  // Calendar settings state
-  const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>('day');
+  // Calendar settings state - use external props
+  const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>(externalCurrentView);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [showWeekends, setShowWeekends] = useState(true);
+  const [showWeekends, setShowWeekends] = useState(externalShowWeekends);
   const [showCurrentTime, setShowCurrentTime] = useState(true);
-  const [timeFormat, setTimeFormat] = useState<'12h' | '24h'>('24h');
+  const [timeFormat, setTimeFormat] = useState<'12h' | '24h'>(externalTimeFormat);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -117,6 +124,47 @@ const EmotionalCalendar: React.FC<EmotionalCalendarProps> = ({ onEventsUpdate })
   const [modalInitialTime, setModalInitialTime] = useState<{ start: Date; end: Date } | undefined>();
 
   const calendarRef = useRef<HTMLElement | null>(null);
+
+  // Update internal state when external props change
+  useEffect(() => {
+    setCurrentView(externalCurrentView);
+  }, [externalCurrentView]);
+
+  useEffect(() => {
+    setShowWeekends(externalShowWeekends);
+  }, [externalShowWeekends]);
+
+  useEffect(() => {
+    setTimeFormat(externalTimeFormat);
+  }, [externalTimeFormat]);
+
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    handleViewChange: (view: 'day' | 'week' | 'month') => {
+      setCurrentView(view);
+    },
+    handleTodayClick: () => {
+      setCurrentDate(new Date());
+    },
+    handleAddEvent: () => {
+      setModalInitialTime({
+        start: new Date(),
+        end: new Date(Date.now() + 60 * 60 * 1000) // 1 hour later
+      });
+      setSelectedEvent(null);
+      setIsModalOpen(true);
+    },
+    handleEditMode: () => {
+      // Toggle edit mode or show edit instructions
+      console.log('Edit mode toggled');
+    },
+    handleClearEvents: () => {
+      if (window.confirm('Are you sure you want to clear all events?')) {
+        setEvents([]);
+        localStorage.removeItem('tampanaEvents');
+      }
+    }
+  }));
 
   const handleEventCreate = useCallback((event: EventData) => {
     setModalInitialTime({
@@ -197,20 +245,6 @@ const EmotionalCalendar: React.FC<EmotionalCalendarProps> = ({ onEventsUpdate })
 
   return (
     <CalendarContainer>
-      <CalendarControls
-        currentView={currentView}
-        onViewChange={handleViewChange}
-        showWeekends={showWeekends}
-        onToggleWeekends={setShowWeekends}
-        showCurrentTime={showCurrentTime}
-        onToggleCurrentTime={setShowCurrentTime}
-        timeFormat={timeFormat}
-        onTimeFormatChange={setTimeFormat}
-        currentDate={currentDate}
-        onDateChange={handleDateChange}
-        onTodayClick={handleTodayClick}
-      />
-      
       <CalendarWrapper>
         <VueCalWrapper
           ref={calendarRef}
@@ -307,6 +341,6 @@ const EmotionalCalendar: React.FC<EmotionalCalendarProps> = ({ onEventsUpdate })
       />
     </CalendarContainer>
   );
-};
+});
 
 export default EmotionalCalendar; 
