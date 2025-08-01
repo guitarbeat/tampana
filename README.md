@@ -103,11 +103,31 @@ If you encounter any issues or have questions, please:
 
 ## 🔮 Roadmap
 
-- [ ] Data persistence with Firebase
-- [ ] Emotional analytics and insights
-- [ ] Export/import functionality
-- [ ] Mobile app version
-- [ ] Integration with external calendar services
+Our vision for Tampana is to create a comprehensive and intuitive emotional well-being tracker. Here's what's planned for future development:
+
+### Short-Term Goals (Next 1-3 Months)
+
+- [x] **Comprehensive Data Export**: Implement robust export functionalities (JSON, CSV, Emotion Summary) for user data.
+- [x] **Enhanced Calendar View**: Improve the calendar/day view with better UI, navigation, and event management.
+- [x] **Local Data Persistence**: Ensure all user data (events, settings) are saved locally using browser storage.
+- [ ] **User Interface Refinements**: Further polish the UI/UX based on user feedback, including improved accessibility and responsiveness.
+- [ ] **Settings Page**: Create a dedicated settings page for managing application preferences (e.g., time format, weekend display, notification settings).
+
+### Mid-Term Goals (Next 3-6 Months)
+
+- [ ] **Cloud Synchronization**: Implement secure cloud synchronization (e.g., Firebase, custom backend) to allow users to access their data across multiple devices.
+- [ ] **Advanced Emotional Analytics**: Develop more sophisticated data visualization and insights into emotional patterns, trends, and correlations.
+- [ ] **Customizable Emotions/Tags**: Allow users to define and manage their own emotions or tags beyond the default set.
+- [ ] **Journaling Feature**: Integrate a simple journaling feature to add contextual notes to emotional events.
+
+### Long-Term Goals (6+ Months)
+
+- [ ] **Mobile Application**: Develop native iOS and Android applications for a seamless mobile experience.
+- [ ] **Integration with External Services**: Explore integrations with other health and wellness platforms or calendar services.
+- [ ] **Community Features**: Potentially add features for sharing insights (anonymously) or connecting with support communities.
+- [ ] **AI-Powered Insights**: Leverage AI to provide personalized recommendations or identify subtle emotional patterns.
+
+We are committed to continuously improving Tampana and welcome community contributions and feedback!
 
 
 
