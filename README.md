@@ -109,3 +109,26 @@ If you encounter any issues or have questions, please:
 - [ ] Mobile app version
 - [ ] Integration with external calendar services
 
+
+
+## 📸 Screenshots
+
+### Main Calendar View
+
+This is the main view of the Tampana application, showing the interactive calendar and the emoji grid. The decorator buttons on the drag/divider bar provide quick access to various features.
+
+![Main Calendar View](./screenshots/tampana_main_view.png)
+
+### Export Data Dropdown
+
+This screenshot shows the dropdown menu for exporting data, accessible from the decorator buttons. You can export your emotional events as JSON, CSV, or get an emotion summary.
+
+![Export Data Dropdown](./screenshots/tampana_export_dropdown.png)
+
+### Menu Accessories
+
+This screenshot displays the menu accessories, also accessible from the decorator buttons. It provides options to add new events, toggle edit mode, clear all events, and access additional export options.
+
+![Menu Accessories](./screenshots/tampana_menu_accessories.png)
+
+
