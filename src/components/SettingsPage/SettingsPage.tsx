@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useTheme } from '../../contexts/ThemeContext';
 
-const SettingsContainer = styled.div`
+const SettingsContainer = styled.div<{ theme: any }>`
   padding: 30px;
-  color: #e0e0e0;
-  background: #1a1a1a;
+  color: ${props => props.theme.color};
+  background: ${props => props.theme.background};
   height: 100%;
   overflow-y: auto;
+  transition: background-color 0.3s ease, color 0.3s ease;
   
   h2 {
-    color: #ffffff;
+    color: ${props => props.theme.color};
     margin-bottom: 30px;
     font-size: 24px;
-    border-bottom: 2px solid #333;
+    border-bottom: 2px solid ${props => props.theme.border};
     padding-bottom: 10px;
   }
   
@@ -20,7 +22,7 @@ const SettingsContainer = styled.div`
     margin-bottom: 30px;
     
     h3 {
-      color: #ffffff;
+      color: ${props => props.theme.color};
       margin-bottom: 15px;
       font-size: 18px;
     }
@@ -29,35 +31,38 @@ const SettingsContainer = styled.div`
   .setting-item {
     margin-bottom: 20px;
     padding: 15px;
-    background: #2a2a2a;
+    background: ${props => props.theme.inputBackground};
     border-radius: 8px;
-    border: 1px solid #333;
+    border: 1px solid ${props => props.theme.border};
+    transition: background-color 0.3s ease, border-color 0.3s ease;
     
     label {
       display: flex;
       align-items: center;
       font-weight: 500;
       cursor: pointer;
+      color: ${props => props.theme.inputColor};
       
       input[type="checkbox"] {
         margin-right: 12px;
         width: 18px;
         height: 18px;
-        accent-color: #4CAF50;
+        accent-color: ${props => props.theme.primary};
       }
       
       input[type="range"] {
         margin-left: 15px;
         flex: 1;
         max-width: 200px;
+        accent-color: ${props => props.theme.primary};
       }
       
       select {
         margin-left: 15px;
         padding: 5px 10px;
-        background: #333;
-        color: #fff;
-        border: 1px solid #555;
+        background: ${props => props.theme.background};
+        color: ${props => props.theme.color};
+        border: 1px solid ${props => props.theme.border};
         border-radius: 4px;
       }
     }
@@ -65,14 +70,14 @@ const SettingsContainer = styled.div`
     .setting-description {
       margin-top: 8px;
       font-size: 14px;
-      color: #aaa;
+      color: ${props => props.theme.color === '#333333' ? '#666' : '#aaa'};
     }
   }
   
   .reset-section {
     margin-top: 40px;
     padding-top: 20px;
-    border-top: 2px solid #333;
+    border-top: 2px solid ${props => props.theme.border};
     
     .reset-button {
       background: #f44336;
@@ -96,28 +101,32 @@ interface SettingsPageProps {
   toggleWeekends: () => void;
   timeFormat24h: boolean;
   toggleTimeFormat: () => void;
+  themeName: 'light' | 'dark';
+  toggleTheme: () => void;
 }
 
 const SettingsPage: React.FC<SettingsPageProps> = ({ 
   showWeekends, 
   toggleWeekends, 
   timeFormat24h, 
-  toggleTimeFormat 
+  toggleTimeFormat,
+  themeName,
+  toggleTheme
 }) => {
+  const { theme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
-  const [theme, setTheme] = useState('dark');
   const [defaultView, setDefaultView] = useState('week');
   const [eventDuration, setEventDuration] = useState(60);
 
   const handleReset = () => {
     if (confirm('Are you sure you want to reset all settings to default? This action cannot be undone.')) {
       // Reset all settings to default
-      toggleWeekends();
-      if (timeFormat24h) toggleTimeFormat();
+      if (showWeekends !== true) toggleWeekends();
+      if (timeFormat24h !== false) toggleTimeFormat();
+      if (themeName !== 'dark') toggleTheme();
       setNotifications(true);
       setAutoSave(true);
-      setTheme('dark');
       setDefaultView('week');
       setEventDuration(60);
       
@@ -130,8 +139,26 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
   };
 
   return (
-    <SettingsContainer>
+    <SettingsContainer theme={theme}>
       <h2>⚙️ Application Settings</h2>
+      
+      <div className="settings-section">
+        <h3>🎨 Appearance</h3>
+        
+        <div className="setting-item">
+          <label>
+            <input
+              type="checkbox"
+              checked={themeName === 'light'}
+              onChange={toggleTheme}
+            />
+            Day Mode (Light Theme)
+          </label>
+          <div className="setting-description">
+            Switch between day mode (light theme) and night mode (dark theme)
+          </div>
+        </div>
+      </div>
       
       <div className="settings-section">
         <h3>📅 Calendar Display</h3>
@@ -232,22 +259,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
           </label>
           <div className="setting-description">
             Show success messages and confirmations for actions
-          </div>
-        </div>
-        
-        <div className="setting-item">
-          <label>
-            Theme:
-            <select 
-              value={theme} 
-              onChange={(e) => setTheme(e.target.value)}
-            >
-              <option value="dark">Dark</option>
-              <option value="light">Light (Coming Soon)</option>
-            </select>
-          </label>
-          <div className="setting-description">
-            Choose your preferred color theme for the application
           </div>
         </div>
       </div>

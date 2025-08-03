@@ -5,6 +5,7 @@ import { EmotionalCalendar } from './components/EmotionalCalendar';
 import { EmojiGridMapper } from './components/EmojiGridMapper/EmojiGridMapper';
 import DataExport from './components/DataExport';
 import SettingsPage from './components/SettingsPage';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { EventData } from './types/event-data';
 import './index.css';
 import './styles/emotional-calendar.css';
@@ -25,14 +26,15 @@ const GlobalStyle = styled.div`
   }
 `;
 
-const AppContainer = styled.div`
+const AppContainer = styled.div<{ theme: any }>`
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: #000;
+  background: ${props => props.theme.background};
   width: 100vw;
   height: 100vh;
-  color: #fff;
+  color: ${props => props.theme.color};
+  transition: background-color 0.3s ease, color 0.3s ease;
 `;
 
 const Panel = styled.div`
@@ -42,7 +44,8 @@ const Panel = styled.div`
   overflow: hidden;
 `;
 
-function App() {
+function ThemedApp() {
+  const { theme, themeName, toggleTheme } = useTheme();
   const [events, setEvents] = useState<EventData[]>([]);
   const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>('week');
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -153,6 +156,13 @@ function App() {
 
   const trailingAccessories = [
     {
+      icon: themeName === 'dark' ? '☀️' : '🌙',
+      tooltip: themeName === 'dark' ? 'Switch to Day Mode' : 'Switch to Night Mode',
+      onClick: toggleTheme,
+      isActive: false,
+      color: themeName === 'dark' ? '#FFD700' : '#4169E1'
+    },
+    {
       icon: '📤',
       tooltip: 'Export Data',
       onClick: handleExportData,
@@ -191,7 +201,7 @@ function App() {
   ];
 
   return (
-    <AppContainer>
+    <AppContainer theme={theme}>
       <GlobalStyle />
       <VerticalSplit
         leadingAccessories={leadingAccessories}
@@ -205,6 +215,8 @@ function App() {
               toggleWeekends={toggleWeekends}
               timeFormat24h={timeFormat24h}
               toggleTimeFormat={toggleTimeFormat}
+              themeName={themeName}
+              toggleTheme={toggleTheme}
             />
           ) : (
             <EmotionalCalendar
@@ -223,6 +235,14 @@ function App() {
       </VerticalSplit>
       <DataExport ref={dataExportRef} events={events} />
     </AppContainer>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <ThemedApp />
+    </ThemeProvider>
   );
 }
 
