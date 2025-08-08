@@ -1,14 +1,30 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef, lazy } from 'react';
 import styled from 'styled-components';
-import { VerticalSplit } from './components/VerticalSplit/VerticalSplit';
-import { EmotionalCalendar } from './components/EmotionalCalendar';
-import { EmojiGridMapper } from './components/EmojiGridMapper/EmojiGridMapper';
-import DataExport from './components/DataExport';
-import SettingsPage from './components/SettingsPage';
+import VerticalSplit from './components/VerticalSplit/VerticalSplit';
+const EmotionalCalendar = lazy(() => import('./components/EmotionalCalendar'));
+const EmojiGridMapper = lazy(() => import('./components/EmojiGridMapper/EmojiGridMapper'));
+const DataExport = lazy(() => import('./components/DataExport'));
+const SettingsPage = lazy(() => import('./components/SettingsPage'));
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { EventData } from './types/event-data';
 import './index.css';
 import './styles/emotional-calendar.css';
+
+// Types for refs exposed by children
+export interface EmotionalCalendarHandle {
+  handleViewChange: (view: 'day' | 'week' | 'month') => void;
+  handleTodayClick: () => void;
+  handleAddEvent: () => void;
+  handleEditMode: () => void;
+  handleClearEvents: () => void;
+}
+
+export interface DataExportHandle {
+  handleExport: () => void;
+  handleExportJSON: () => void;
+  handleExportCSV: () => void;
+  handleExportSummary: () => void;
+}
 
 const GlobalStyle = styled.div`
   html, body, #root {
@@ -48,13 +64,13 @@ function ThemedApp() {
   const { theme, themeName, toggleTheme } = useTheme();
   const [events, setEvents] = useState<EventData[]>([]);
   const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>('week');
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [, setCurrentDate] = useState(new Date()); // used to force-update date when clicking Today
   const [showWeekends, setShowWeekends] = useState(true);
   const [timeFormat24h, setTimeFormat24h] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   
-  const calendarRef = useRef<any>(null);
-  const dataExportRef = useRef<any>(null);
+  const calendarRef = useRef<EmotionalCalendarHandle | null>(null);
+  const dataExportRef = useRef<DataExportHandle | null>(null);
 
   const handleEventsUpdate = (updatedEvents: EventData[]) => {
     setEvents(updatedEvents);
@@ -74,53 +90,37 @@ function ThemedApp() {
 
   const handleViewChange = (view: 'day' | 'week' | 'month') => {
     setCurrentView(view);
-    if (calendarRef.current) {
-      calendarRef.current.changeView(view);
-    }
+    calendarRef.current?.handleViewChange(view);
   };
 
   const handleTodayClick = () => {
     const today = new Date();
     setCurrentDate(today);
-    if (calendarRef.current) {
-      calendarRef.current.goToToday();
-    }
+    calendarRef.current?.handleTodayClick();
   };
 
   const handleAddEvent = () => {
-    if (calendarRef.current) {
-      calendarRef.current.openEventModal();
-    }
+    calendarRef.current?.handleAddEvent();
   };
 
   const handleEditMode = () => {
-    if (calendarRef.current) {
-      calendarRef.current.toggleEditMode();
-    }
+    calendarRef.current?.handleEditMode();
   };
 
   const handleClearEvents = () => {
-    if (calendarRef.current) {
-      calendarRef.current.clearAllEvents();
-    }
+    calendarRef.current?.handleClearEvents();
   };
 
   const handleExportData = () => {
-    if (dataExportRef.current) {
-      dataExportRef.current.handleExport();
-    }
+    dataExportRef.current?.handleExport();
   };
 
   const handleExportJSON = () => {
-    if (dataExportRef.current) {
-      dataExportRef.current.handleExportJSON();
-    }
+    dataExportRef.current?.handleExportJSON();
   };
 
   const handleExportCSV = () => {
-    if (dataExportRef.current) {
-      dataExportRef.current.handleExportCSV();
-    }
+    dataExportRef.current?.handleExportCSV();
   };
 
   const leadingAccessories = [
@@ -221,10 +221,9 @@ function ThemedApp() {
           ) : (
             <EmotionalCalendar
               ref={calendarRef}
-              view={currentView}
-              currentDate={currentDate}
+              currentView={currentView}
               showWeekends={showWeekends}
-              timeFormat24h={timeFormat24h}
+              timeFormat={timeFormat24h ? '24h' : '12h'}
               onEventsUpdate={handleEventsUpdate}
             />
           )}

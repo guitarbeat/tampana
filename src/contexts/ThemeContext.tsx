@@ -44,10 +44,22 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [themeName, setThemeName] = useState<'light' | 'dark'>('dark');
+  const [themeName, setThemeName] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('tampanaTheme');
+      if (saved === 'light' || saved === 'dark') return saved;
+    }
+    return 'dark';
+  });
 
   const toggleTheme = () => {
-    setThemeName((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+    setThemeName((prevTheme) => {
+      const next = prevTheme === 'light' ? 'dark' : 'light';
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('tampanaTheme', next);
+      }
+      return next;
+    });
   };
 
   const theme = themes[themeName];
