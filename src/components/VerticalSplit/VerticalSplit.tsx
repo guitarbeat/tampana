@@ -16,6 +16,8 @@ interface SplitAccessory {
   icon: React.ReactNode;
   onClick: () => void;
   color?: string;
+  tooltip?: string;
+  isActive?: boolean;
 }
 
 interface MenuAccessory {
@@ -359,16 +361,18 @@ const Divider = ({
 
 // Main component interface
 interface VerticalSplitProps {
-  topView: React.ReactNode;
-  bottomView: React.ReactNode;
+  topView?: React.ReactNode;
+  bottomView?: React.ReactNode;
   topViewOverlay?: React.ReactNode;
   bottomViewOverlay?: React.ReactNode;
   bgColor?: string;
   leadingAccessories?: SplitAccessory[];
   trailingAccessories?: SplitAccessory[];
   menuAccessories?: MenuAccessory[];
+  menuItems?: MenuAccessory[];
   menuIcon?: React.ReactNode;
   menuColor?: string;
+  children?: React.ReactNode;
 }
 
 /**
@@ -384,14 +388,22 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   leadingAccessories,
   trailingAccessories,
   menuAccessories,
+  menuItems,
   menuIcon,
   menuColor,
+  children,
 }) => {
   // State variables
   const containerRef = useRef<HTMLDivElement>(null);
   const [splitY, setSplitY] = useState<number>(0);
   const [containerHeight, setContainerHeight] = useState<number>(0);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+
+  // Derive content from explicit props or children
+  const childrenArray = React.Children.toArray(children);
+  const effectiveTop = topView ?? childrenArray[0] ?? null;
+  const effectiveBottom = bottomView ?? childrenArray[1] ?? null;
+  const effectiveMenu = menuItems ?? menuAccessories;
 
   // Initialize container height and split position
   useEffect(() => {
@@ -593,7 +605,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         $scale={topScale}
       >
         <ContentContainer>
-          {topView}
+          {effectiveTop}
           {topViewOverlay}
         </ContentContainer>
       </TopPanel>
@@ -605,7 +617,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         onTouchStart={handleTouchStart}
         leadingAccessories={leadingAccessories}
         trailingAccessories={trailingAccessories}
-        menuAccessories={menuAccessories}
+        menuAccessories={effectiveMenu}
         menuIcon={menuIcon}
         menuColor={menuColor}
       />
@@ -618,7 +630,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         $scale={bottomScale}
       >
         <ContentContainer>
-          {bottomViewOverlay ? bottomViewOverlay : bottomView}
+          {bottomViewOverlay ? bottomViewOverlay : effectiveBottom}
         </ContentContainer>
       </BottomPanel>
     </Container>

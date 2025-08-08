@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
-import VueCalWrapper from './VueCalWrapper';
+import { useState, useCallback, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import VueCalWrapper from './EventModal/../VueCalWrapper';
 import EventModal from './EventModal';
 import styled from 'styled-components';
 import { EventData } from '../types/event-data';
@@ -26,7 +26,15 @@ interface EmotionalCalendarProps {
   timeFormat?: '12h' | '24h';
 }
 
-const EmotionalCalendar = forwardRef<any, EmotionalCalendarProps>(({ 
+export interface EmotionalCalendarHandle {
+  handleViewChange: (view: 'day' | 'week' | 'month') => void;
+  handleTodayClick: () => void;
+  handleAddEvent: () => void;
+  handleEditMode: () => void;
+  handleClearEvents: () => void;
+}
+
+const EmotionalCalendar = forwardRef<EmotionalCalendarHandle, EmotionalCalendarProps>(({ 
   onEventsUpdate,
   currentView: externalCurrentView = 'day',
   showWeekends: externalShowWeekends = true,
@@ -115,7 +123,7 @@ const EmotionalCalendar = forwardRef<any, EmotionalCalendarProps>(({
   const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>(externalCurrentView);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showWeekends, setShowWeekends] = useState(externalShowWeekends);
-  const [showCurrentTime, setShowCurrentTime] = useState(true);
+  const [showCurrentTime] = useState(true);
   const [timeFormat, setTimeFormat] = useState<'12h' | '24h'>(externalTimeFormat);
   
   // Modal state
@@ -233,14 +241,6 @@ const EmotionalCalendar = forwardRef<any, EmotionalCalendarProps>(({
     setSelectedEvent(event);
     setModalInitialTime(undefined);
     setIsModalOpen(true);
-  }, []);
-
-  const handleTodayClick = useCallback(() => {
-    setCurrentDate(new Date());
-  }, []);
-
-  const handleDateChange = useCallback((date: Date) => {
-    setCurrentDate(date);
   }, []);
 
   return (

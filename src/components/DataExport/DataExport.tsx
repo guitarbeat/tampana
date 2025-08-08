@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import { useState, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 import { EventData } from '../../types/event-data';
 
@@ -110,11 +110,18 @@ interface DataExportProps {
   events: EventData[];
 }
 
-const DataExport = forwardRef<any, DataExportProps>(({ events }, ref) => {
+export interface DataExportHandle {
+  handleExport: () => void;
+  handleExportJSON: () => void;
+  handleExportCSV: () => void;
+  handleExportSummary: () => void;
+}
+
+const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events }, ref) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
 
-  const showToast = (message: string) => {
+  const showToast = () => {
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), 3000);
   };
@@ -149,7 +156,7 @@ const DataExport = forwardRef<any, DataExportProps>(({ events }, ref) => {
     const jsonString = JSON.stringify(exportData, null, 2);
     const filename = `tampana-emotions-${new Date().toISOString().split('T')[0]}.json`;
     downloadFile(jsonString, filename, 'application/json');
-    showToast('Exported as JSON successfully!');
+    showToast();
     setIsDropdownOpen(false);
   };
 
@@ -171,7 +178,7 @@ const DataExport = forwardRef<any, DataExportProps>(({ events }, ref) => {
     const csvString = csvRows.join('\n');
     const filename = `tampana-emotions-${new Date().toISOString().split('T')[0]}.csv`;
     downloadFile(csvString, filename, 'text/csv');
-    showToast('Exported as CSV successfully!');
+    showToast();
     setIsDropdownOpen(false);
   };
 
@@ -200,7 +207,7 @@ const DataExport = forwardRef<any, DataExportProps>(({ events }, ref) => {
     const jsonString = JSON.stringify(summary, null, 2);
     const filename = `tampana-emotion-summary-${new Date().toISOString().split('T')[0]}.json`;
     downloadFile(jsonString, filename, 'application/json');
-    showToast('Emotion summary exported!');
+    showToast();
     setIsDropdownOpen(false);
   };
 

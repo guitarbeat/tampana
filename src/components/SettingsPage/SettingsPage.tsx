@@ -131,8 +131,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
       setEventDuration(60);
       
       // Clear localStorage
-      localStorage.removeItem('tampana-events');
-      localStorage.removeItem('tampana-settings');
+      localStorage.removeItem('tampanaEvents');
+      localStorage.removeItem('tampanaSettings');
+      localStorage.removeItem('tampanaTheme');
       
       alert('Settings have been reset to default values.');
     }
