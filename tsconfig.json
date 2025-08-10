@@ -18,7 +18,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "types": ["vite/client", "jest", "node"]
   },
   "include": ["src/main.tsx","src/App.tsx", "src/components/**/*", "src/types/**/*"],
 
