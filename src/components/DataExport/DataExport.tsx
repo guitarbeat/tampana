@@ -108,6 +108,7 @@ const NotificationToast = styled.div<{ show: boolean }>`
 
 interface DataExportProps {
   events: EventData[];
+  enableToasts?: boolean;
 }
 
 export interface DataExportHandle {
@@ -117,13 +118,15 @@ export interface DataExportHandle {
   handleExportSummary: () => void;
 }
 
-const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events }, ref) => {
+const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enableToasts }, ref) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
 
-  const showToast = () => {
+  const showToast = (message: string) => {
+    setNotificationMessage(message);
     setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000);
+    setTimeout(() => setShowNotification(false), 2500);
   };
 
   const downloadFile = (content: string, filename: string, mimeType: string) => {
@@ -156,7 +159,7 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events }, re
     const jsonString = JSON.stringify(exportData, null, 2);
     const filename = `tampana-emotions-${new Date().toISOString().split('T')[0]}.json`;
     downloadFile(jsonString, filename, 'application/json');
-    showToast();
+    if (enableToasts !== false) showToast('Exported JSON');
     setIsDropdownOpen(false);
   };
 
@@ -178,7 +181,7 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events }, re
     const csvString = csvRows.join('\n');
     const filename = `tampana-emotions-${new Date().toISOString().split('T')[0]}.csv`;
     downloadFile(csvString, filename, 'text/csv');
-    showToast();
+    if (enableToasts !== false) showToast('Exported CSV');
     setIsDropdownOpen(false);
   };
 
@@ -207,7 +210,7 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events }, re
     const jsonString = JSON.stringify(summary, null, 2);
     const filename = `tampana-emotion-summary-${new Date().toISOString().split('T')[0]}.json`;
     downloadFile(jsonString, filename, 'application/json');
-    showToast();
+    if (enableToasts !== false) showToast('Exported Emotion Summary');
     setIsDropdownOpen(false);
   };
 
@@ -227,6 +230,8 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events }, re
         <ExportButton
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           aria-label="Export data"
+          aria-haspopup="menu"
+          aria-expanded={isDropdownOpen}
         >
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
@@ -248,6 +253,35 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events }, re
             </svg>
             Export as CSV
           </DropdownItem>
+
+          <DropdownItem onClick={async () => {
+            const exportData = {
+              exportDate: new Date().toISOString(),
+              totalEvents: events.length,
+              events: events.map(event => ({
+                id: event.id,
+                title: event.title,
+                start: event.start.toISOString(),
+                end: event.end.toISOString(),
+                emotion: event.emotion,
+                emoji: event.emoji,
+                duration: Math.round((event.end.getTime() - event.start.getTime()) / (1000 * 60))
+              }))
+            };
+            const jsonString = JSON.stringify(exportData, null, 2);
+            try {
+              await navigator.clipboard.writeText(jsonString);
+              if (enableToasts !== false) showToast('Copied JSON to clipboard');
+            } catch (e) {
+              if (enableToasts !== false) showToast('Unable to copy to clipboard');
+            }
+            setIsDropdownOpen(false);
+          }}>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19,21H8V7H19M19,3H8C6.9,3 6,3.9 6,5V21C6,22.1 6.9,23 8,23H19C20.1,23 21,22.1 21,21V5C21,3.9 20.1,3 19,3M16,1H4C2.9,1 2,1.9 2,3V17H4V3H16V1Z" />
+            </svg>
+            Copy JSON to Clipboard
+          </DropdownItem>
           
           <DropdownItem onClick={exportEmotionSummary}>
             <svg viewBox="0 0 24 24" fill="currentColor">
@@ -258,11 +292,11 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events }, re
         </DropdownMenu>
       </ExportContainer>
 
-      <NotificationToast show={showNotification}>
+      <NotificationToast show={showNotification} aria-live="polite" role="status">
         <svg viewBox="0 0 24 24" fill="currentColor">
           <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,16.5L18,9.5L16.59,8.09L11,13.67L7.91,10.59L6.5,12L11,16.5Z" />
         </svg>
-        Data exported successfully!
+        {notificationMessage || 'Action completed'}
       </NotificationToast>
     </>
   );

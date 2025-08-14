@@ -103,6 +103,10 @@ interface SettingsPageProps {
   toggleTimeFormat: () => void;
   themeName: 'light' | 'dark';
   toggleTheme: () => void;
+  eventDuration: number;
+  onChangeEventDuration: (minutes: number) => void;
+  notifications: boolean;
+  onChangeNotifications: (enabled: boolean) => void;
 }
 
 const SettingsPage: React.FC<SettingsPageProps> = ({ 
@@ -111,13 +115,15 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
   timeFormat24h, 
   toggleTimeFormat,
   themeName,
-  toggleTheme
+  toggleTheme,
+  eventDuration,
+  onChangeEventDuration,
+  notifications,
+  onChangeNotifications
 }) => {
   const { theme } = useTheme();
-  const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
   const [defaultView, setDefaultView] = useState('week');
-  const [eventDuration, setEventDuration] = useState(60);
 
   const handleReset = () => {
     if (confirm('Are you sure you want to reset all settings to default? This action cannot be undone.')) {
@@ -125,10 +131,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
       if (showWeekends !== true) toggleWeekends();
       if (timeFormat24h !== false) toggleTimeFormat();
       if (themeName !== 'dark') toggleTheme();
-      setNotifications(true);
+      onChangeNotifications(true);
       setAutoSave(true);
       setDefaultView('week');
-      setEventDuration(60);
+      onChangeEventDuration(60);
       
       // Clear localStorage
       localStorage.removeItem('tampanaEvents');
@@ -222,7 +228,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
               max="240"
               step="15"
               value={eventDuration}
-              onChange={(e) => setEventDuration(Number(e.target.value))}
+              onChange={(e) => onChangeEventDuration(Number(e.target.value))}
             />
             <span style={{ marginLeft: '10px', minWidth: '60px' }}>{eventDuration}min</span>
           </label>
@@ -254,7 +260,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
             <input
               type="checkbox"
               checked={notifications}
-              onChange={() => setNotifications(!notifications)}
+              onChange={() => onChangeNotifications(!notifications)}
             />
             Enable Notifications
           </label>

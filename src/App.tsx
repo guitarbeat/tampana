@@ -1,4 +1,4 @@
-import { useState, useRef, lazy } from 'react';
+import { useState, useRef, lazy, useEffect } from 'react';
 import styled from 'styled-components';
 import VerticalSplit from './components/VerticalSplit/VerticalSplit';
 const EmotionalCalendar = lazy(() => import('./components/EmotionalCalendar'));
@@ -63,14 +63,102 @@ const Panel = styled.div`
 function ThemedApp() {
   const { theme, themeName, toggleTheme } = useTheme();
   const [events, setEvents] = useState<EventData[]>([]);
-  const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>('week');
+  const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('tampanaCurrentView');
+      if (saved === 'day' || saved === 'week' || saved === 'month') return saved;
+      try {
+        const settings = JSON.parse(localStorage.getItem('tampanaSettings') || '{}');
+        if (settings.defaultView === 'day' || settings.defaultView === 'week' || settings.defaultView === 'month') {
+          return settings.defaultView;
+        }
+      } catch {}
+    }
+    return 'week';
+  });
   const [, setCurrentDate] = useState(new Date()); // used to force-update date when clicking Today
-  const [showWeekends, setShowWeekends] = useState(true);
-  const [timeFormat24h, setTimeFormat24h] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [showWeekends, setShowWeekends] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('tampanaShowWeekends');
+      if (saved === 'true' || saved === 'false') return saved === 'true';
+    }
+    return true;
+  });
+  const [timeFormat24h, setTimeFormat24h] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('tampanaTimeFormat24h');
+      if (saved === 'true' || saved === 'false') return saved === 'true';
+    }
+    return false;
+  });
+  const [showSettings, setShowSettings] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('tampanaShowSettings');
+      if (saved === 'true' || saved === 'false') return saved === 'true';
+    }
+    return false;
+  });
+  const [defaultEventDuration, setDefaultEventDuration] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const settings = JSON.parse(localStorage.getItem('tampanaSettings') || '{}');
+        if (typeof settings.eventDuration === 'number') return settings.eventDuration;
+      } catch {}
+    }
+    return 60;
+  });
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const settings = JSON.parse(localStorage.getItem('tampanaSettings') || '{}');
+        if (typeof settings.notifications === 'boolean') return settings.notifications;
+      } catch {}
+    }
+    return true;
+  });
   
   const calendarRef = useRef<EmotionalCalendarHandle | null>(null);
   const dataExportRef = useRef<DataExportHandle | null>(null);
+
+  useEffect(() => { localStorage.setItem('tampanaCurrentView', currentView); }, [currentView]);
+  useEffect(() => { localStorage.setItem('tampanaShowWeekends', String(showWeekends)); }, [showWeekends]);
+  useEffect(() => { localStorage.setItem('tampanaTimeFormat24h', String(timeFormat24h)); }, [timeFormat24h]);
+  useEffect(() => { localStorage.setItem('tampanaShowSettings', String(showSettings)); }, [showSettings]);
+  useEffect(() => {
+    const prev = (() => { try { return JSON.parse(localStorage.getItem('tampanaSettings') || '{}'); } catch { return {}; }})();
+    const next = { ...prev, eventDuration: defaultEventDuration };
+    localStorage.setItem('tampanaSettings', JSON.stringify(next));
+  }, [defaultEventDuration]);
+  useEffect(() => {
+    const prev = (() => { try { return JSON.parse(localStorage.getItem('tampanaSettings') || '{}'); } catch { return {}; }})();
+    const next = { ...prev, notifications: notificationsEnabled };
+    localStorage.setItem('tampanaSettings', JSON.stringify(next));
+  }, [notificationsEnabled]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+      switch (e.key.toLowerCase()) {
+        case '1': setCurrentView('day'); calendarRef.current?.handleViewChange('day'); break;
+        case '2': setCurrentView('week'); calendarRef.current?.handleViewChange('week'); break;
+        case '3': setCurrentView('month'); calendarRef.current?.handleViewChange('month'); break;
+        case 't': {
+          const today = new Date();
+          setCurrentDate(today);
+          calendarRef.current?.handleTodayClick();
+          break;
+        }
+        case 'e': dataExportRef.current?.handleExport(); break;
+        case 'w': setShowWeekends(prev => !prev); break;
+        case 'f': setTimeFormat24h(prev => !prev); break;
+        case 's': setShowSettings(prev => !prev); break;
+        default: break;
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const handleEventsUpdate = (updatedEvents: EventData[]) => {
     setEvents(updatedEvents);
@@ -126,28 +214,28 @@ function ThemedApp() {
   const leadingAccessories = [
     {
       icon: '📅',
-      tooltip: 'Day View',
+      tooltip: 'Day View (1)',
       onClick: () => handleViewChange('day'),
       isActive: currentView === 'day',
       color: currentView === 'day' ? '#4CAF50' : '#666'
     },
     {
       icon: '📊',
-      tooltip: 'Week View',
+      tooltip: 'Week View (2)',
       onClick: () => handleViewChange('week'),
       isActive: currentView === 'week',
       color: currentView === 'week' ? '#2196F3' : '#666'
     },
     {
       icon: '📆',
-      tooltip: 'Month View',
+      tooltip: 'Month View (3)',
       onClick: () => handleViewChange('month'),
       isActive: currentView === 'month',
       color: currentView === 'month' ? '#9C27B0' : '#666'
     },
     {
       icon: '🏠',
-      tooltip: 'Today',
+      tooltip: 'Today (T)',
       onClick: handleTodayClick,
       isActive: false,
       color: '#FFD700'
@@ -164,28 +252,28 @@ function ThemedApp() {
     },
     {
       icon: '📤',
-      tooltip: 'Export Data',
+      tooltip: 'Export Data (E)',
       onClick: handleExportData,
       isActive: false,
       color: '#FF9800'
     },
     {
       icon: showWeekends ? '📅' : '🗓️',
-      tooltip: showWeekends ? 'Hide Weekends' : 'Show Weekends',
+      tooltip: showWeekends ? 'Hide Weekends (W)' : 'Show Weekends (W)',
       onClick: toggleWeekends,
       isActive: showWeekends,
       color: showWeekends ? '#4CAF50' : '#666'
     },
     {
       icon: timeFormat24h ? '🕐' : '🕛',
-      tooltip: timeFormat24h ? '12h Format' : '24h Format',
+      tooltip: timeFormat24h ? '12h Format (F)' : '24h Format (F)',
       onClick: toggleTimeFormat,
       isActive: timeFormat24h,
       color: timeFormat24h ? '#2196F3' : '#666'
     },
     {
       icon: '⚙️',
-      tooltip: 'Settings',
+      tooltip: 'Settings (S)',
       onClick: handleSettingsClick,
       isActive: showSettings,
       color: showSettings ? '#FF5722' : '#666'
@@ -217,6 +305,10 @@ function ThemedApp() {
               toggleTimeFormat={toggleTimeFormat}
               themeName={themeName}
               toggleTheme={toggleTheme}
+              eventDuration={defaultEventDuration}
+              onChangeEventDuration={setDefaultEventDuration}
+              notifications={notificationsEnabled}
+              onChangeNotifications={setNotificationsEnabled}
             />
           ) : (
             <EmotionalCalendar
@@ -225,6 +317,7 @@ function ThemedApp() {
               showWeekends={showWeekends}
               timeFormat={timeFormat24h ? '24h' : '12h'}
               onEventsUpdate={handleEventsUpdate}
+              defaultEventDurationMinutes={defaultEventDuration}
             />
           )}
         </Panel>
@@ -232,7 +325,7 @@ function ThemedApp() {
           <EmojiGridMapper />
         </Panel>
       </VerticalSplit>
-      <DataExport ref={dataExportRef} events={events} />
+      <DataExport ref={dataExportRef} events={events} enableToasts={notificationsEnabled} />
     </AppContainer>
   );
 }

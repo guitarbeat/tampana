@@ -24,6 +24,7 @@ interface EmotionalCalendarProps {
   currentView?: 'day' | 'week' | 'month';
   showWeekends?: boolean;
   timeFormat?: '12h' | '24h';
+  defaultEventDurationMinutes?: number;
 }
 
 export interface EmotionalCalendarHandle {
@@ -38,7 +39,8 @@ const EmotionalCalendar = forwardRef<EmotionalCalendarHandle, EmotionalCalendarP
   onEventsUpdate,
   currentView: externalCurrentView = 'day',
   showWeekends: externalShowWeekends = true,
-  timeFormat: externalTimeFormat = '24h'
+  timeFormat: externalTimeFormat = '24h',
+  defaultEventDurationMinutes = 60
 }, ref) => {
   const [events, setEvents] = useState<EventData[]>(() => {
     const storedEvents = localStorage.getItem("tampanaEvents");
@@ -155,10 +157,9 @@ const EmotionalCalendar = forwardRef<EmotionalCalendarHandle, EmotionalCalendarP
       setCurrentDate(new Date());
     },
     handleAddEvent: () => {
-      setModalInitialTime({
-        start: new Date(),
-        end: new Date(Date.now() + 60 * 60 * 1000) // 1 hour later
-      });
+      const start = new Date();
+      const end = new Date(start.getTime() + defaultEventDurationMinutes * 60 * 1000);
+      setModalInitialTime({ start, end });
       setSelectedEvent(null);
       setIsModalOpen(true);
     },
@@ -175,13 +176,12 @@ const EmotionalCalendar = forwardRef<EmotionalCalendarHandle, EmotionalCalendarP
   }));
 
   const handleEventCreate = useCallback((event: EventData) => {
-    setModalInitialTime({
-      start: event.start,
-      end: event.end
-    });
+    const start = event.start;
+    const end = new Date(start.getTime() + defaultEventDurationMinutes * 60 * 1000);
+    setModalInitialTime({ start, end });
     setSelectedEvent(null);
     setIsModalOpen(true);
-  }, []);
+  }, [defaultEventDurationMinutes]);
 
   const handleEventSave = useCallback((eventData: Partial<EventData>) => {
     if (eventData.id) {

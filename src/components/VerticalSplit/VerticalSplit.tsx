@@ -99,6 +99,36 @@ const AccessoriesContainer = styled.div`
   z-index: 100;
 `;
 
+const AccessoryWrapper = styled.div`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover .vs-tooltip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+`;
+
+const Tooltip = styled.div`
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translate(-50%, 4px);
+  background: rgba(30, 30, 30, 0.95);
+  color: #fff;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+`;
+
 const MenuButton = styled(AccessoryButton)`
   position: relative;
 `;
@@ -276,16 +306,22 @@ const Divider = ({
         {leadingAccessories && leadingAccessories.length > 0 && (
           <AccessoriesContainer>
             {leadingAccessories.map((accessory, index) => (
-              <AccessoryButton 
-                key={`leading-${index}`} 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  accessory.onClick();
-                }}
-                $color={accessory.color}
-              >
-                {accessory.icon}
-              </AccessoryButton>
+              <AccessoryWrapper key={`leading-${index}`}>
+                <AccessoryButton 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    accessory.onClick();
+                  }}
+                  $color={accessory.color}
+                  aria-label={accessory.tooltip}
+                  title={accessory.tooltip}
+                >
+                  {accessory.icon}
+                </AccessoryButton>
+                {accessory.tooltip && (
+                  <Tooltip className="vs-tooltip">{accessory.tooltip}</Tooltip>
+                )}
+              </AccessoryWrapper>
             ))}
           </AccessoriesContainer>
         )}
@@ -308,16 +344,22 @@ const Divider = ({
         {/* Trailing accessories */}
         <AccessoriesContainer>
           {trailingAccessories && trailingAccessories.map((accessory, index) => (
-            <AccessoryButton 
-              key={`trailing-${index}`} 
-              onClick={(e) => {
-                e.stopPropagation();
-                accessory.onClick();
-              }}
-              $color={accessory.color}
-            >
-              {accessory.icon}
-            </AccessoryButton>
+            <AccessoryWrapper key={`trailing-${index}`}>
+              <AccessoryButton 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  accessory.onClick();
+                }}
+                $color={accessory.color}
+                aria-label={accessory.tooltip}
+                title={accessory.tooltip}
+              >
+                {accessory.icon}
+              </AccessoryButton>
+              {accessory.tooltip && (
+                <Tooltip className="vs-tooltip">{accessory.tooltip}</Tooltip>
+              )}
+            </AccessoryWrapper>
           ))}
           
           {/* Menu button if menu accessories exist */}
