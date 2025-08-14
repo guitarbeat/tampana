@@ -48,6 +48,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('tampanaTheme');
       if (saved === 'light' || saved === 'dark') return saved;
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return prefersDark ? 'dark' : 'light';
     }
     return 'dark';
   });
