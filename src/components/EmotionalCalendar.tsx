@@ -3,6 +3,7 @@ import VueCalWrapper from './EventModal/../VueCalWrapper';
 import EventModal from './EventModal';
 import styled from 'styled-components';
 import { EventData } from '../types/event-data';
+import { postEventChange } from '../services/n8nClient';
 
 const CalendarContainer = styled.div`
   height: 100%;
@@ -191,6 +192,15 @@ const EmotionalCalendar = forwardRef<EmotionalCalendarHandle, EmotionalCalendarP
           event.id === eventData.id ? { ...event, ...eventData } as EventData : event
         );
         onEventsUpdate?.(updatedEvents);
+        const updated = updatedEvents.find(e => e.id === eventData.id);
+        if (updated) {
+          // Fire and forget; client handles queuing
+          postEventChange({
+            ...updated,
+            start: updated.start.toISOString(),
+            end: updated.end.toISOString(),
+          }, 'updated');
+        }
         return updatedEvents;
       });
     } else {
@@ -210,6 +220,11 @@ const EmotionalCalendar = forwardRef<EmotionalCalendarHandle, EmotionalCalendarP
       setEvents(prev => {
         const updatedEvents = [...prev, newEvent];
         onEventsUpdate?.(updatedEvents);
+        postEventChange({
+          ...newEvent,
+          start: newEvent.start.toISOString(),
+          end: newEvent.end.toISOString(),
+        }, 'created');
         return updatedEvents;
       });
     }
@@ -219,6 +234,8 @@ const EmotionalCalendar = forwardRef<EmotionalCalendarHandle, EmotionalCalendarP
     setEvents(prev => {
       const updatedEvents = prev.filter(event => event.id !== eventId);
       onEventsUpdate?.(updatedEvents);
+      // Send minimal payload for delete
+      postEventChange({ id: eventId }, 'deleted');
       return updatedEvents;
     });
   }, [onEventsUpdate]);
