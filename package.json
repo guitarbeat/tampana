@@ -18,10 +18,13 @@
   },
   "dependencies": {
     "@vfx-js/core": "^0.6.0",
+    "axios": "^1.6.0",
+    "date-fns": "^2.30.0",
     "gsap": "^3.13.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "styled-components": "^6.1.18",
+    "uuid": "^9.0.1",
     "veaury": "^2.6.2",
     "vue-cal": "^5.0.1-rc.25"
   },
@@ -31,6 +34,7 @@
     "@types/jest": "^29.5.4",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.8.1",
     "@typescript-eslint/parser": "^8.8.1",
     "@vitejs/plugin-react": "^4.0.3",
