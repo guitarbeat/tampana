@@ -1,6 +1,7 @@
 import { useState, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 import { EventData } from '../../types/event-data';
+import { postExport, postSummary } from '../../services/n8nClient';
 
 const ExportContainer = styled.div`
   position: fixed;
@@ -163,6 +164,25 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enab
     setIsDropdownOpen(false);
   };
 
+  const sendJSONToN8N = async () => {
+    const exportData = {
+      exportDate: new Date().toISOString(),
+      totalEvents: events.length,
+      events: events.map(event => ({
+        id: event.id,
+        title: event.title,
+        start: event.start.toISOString(),
+        end: event.end.toISOString(),
+        emotion: event.emotion,
+        emoji: event.emoji,
+        duration: Math.round((event.end.getTime() - event.start.getTime()) / (1000 * 60))
+      }))
+    };
+    const res = await postExport(exportData);
+    if (enableToasts !== false) showToast(res && 'queued' in res && res.queued ? 'Queued export to n8n' : 'Sent export to n8n');
+    setIsDropdownOpen(false);
+  };
+
   const exportAsCSV = () => {
     const headers = ['ID', 'Title', 'Start Date', 'End Date', 'Emotion', 'Emoji', 'Duration (minutes)'];
     const csvRows = [
@@ -214,6 +234,33 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enab
     setIsDropdownOpen(false);
   };
 
+  const sendSummaryToN8N = async () => {
+    const emotionCounts = events.reduce((acc, event) => {
+      acc[event.emotion] = (acc[event.emotion] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const totalEvents = events.length;
+    const summary = {
+      exportDate: new Date().toISOString(),
+      totalEvents,
+      emotionBreakdown: Object.entries(emotionCounts).map(([emotion, count]) => ({
+        emotion,
+        count,
+        percentage: totalEvents > 0 ? Math.round((count / totalEvents) * 100) : 0
+      })).sort((a, b) => b.count - a.count),
+      mostCommonEmotion: Object.entries(emotionCounts).reduce((a, b) => (emotionCounts[a[0]] > emotionCounts[b[0]] ? a : b), ['', 0] as any)[0],
+      dateRange: {
+        earliest: events.length > 0 ? new Date(Math.min(...events.map(e => e.start.getTime()))).toISOString() : null,
+        latest: events.length > 0 ? new Date(Math.max(...events.map(e => e.end.getTime()))).toISOString() : null
+      }
+    } as any;
+
+    const res = await postSummary(summary);
+    if (enableToasts !== false) showToast(res && 'queued' in res && res.queued ? 'Queued summary to n8n' : 'Sent summary to n8n');
+    setIsDropdownOpen(false);
+  };
+
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     handleExport: () => {
@@ -254,6 +301,13 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enab
             Export as CSV
           </DropdownItem>
 
+          <DropdownItem onClick={sendJSONToN8N}>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M5,3H19A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3M12,17L7,12H10V8H14V12H17L12,17Z" />
+            </svg>
+            Send JSON to n8n
+          </DropdownItem>
+
           <DropdownItem onClick={async () => {
             const exportData = {
               exportDate: new Date().toISOString(),
@@ -288,6 +342,14 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enab
               <path d="M19,3H5C3.9,3 3,3.9 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3M19,19H5V5H19V19M17,17H7V15H17V17M17,13H7V11H17V13M17,9H7V7H17V9Z" />
             </svg>
             Emotion Summary
+          </DropdownItem>
+          
+
+          <DropdownItem onClick={sendSummaryToN8N}>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12,3L4.5,20.29L5.21,21H18.79L19.5,20.29L12,3M12,6.19L17.6,19H6.4L12,6.19Z" />
+            </svg>
+            Send Summary to n8n
           </DropdownItem>
         </DropdownMenu>
       </ExportContainer>

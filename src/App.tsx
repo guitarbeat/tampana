@@ -72,7 +72,7 @@ function ThemedApp() {
         if (settings.defaultView === 'day' || settings.defaultView === 'week' || settings.defaultView === 'month') {
           return settings.defaultView;
         }
-      } catch {}
+      } catch (e) { /* ignore invalid JSON */ }
     }
     return 'week';
   });
@@ -103,7 +103,7 @@ function ThemedApp() {
       try {
         const settings = JSON.parse(localStorage.getItem('tampanaSettings') || '{}');
         if (typeof settings.eventDuration === 'number') return settings.eventDuration;
-      } catch {}
+      } catch (e) { /* ignore invalid JSON */ }
     }
     return 60;
   });
@@ -112,7 +112,7 @@ function ThemedApp() {
       try {
         const settings = JSON.parse(localStorage.getItem('tampanaSettings') || '{}');
         if (typeof settings.notifications === 'boolean') return settings.notifications;
-      } catch {}
+      } catch (e) { /* ignore invalid JSON */ }
     }
     return true;
   });
