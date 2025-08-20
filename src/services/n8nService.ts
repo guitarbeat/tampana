@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
+import { subDays } from 'date-fns';
 import {
   N8NConfig,
   EmotionalData,

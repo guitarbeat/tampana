@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import n8nService from '../services/n8nService';
-import { N8NWorkflowTemplate, N8NResponse } from '../types/n8n';
+import { N8NWorkflowTemplate } from '../types/n8n';
 import { workflowTemplates } from '../data/n8nWorkflowTemplates';
 
 const Container = styled.div`
