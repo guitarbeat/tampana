@@ -1,8 +1,8 @@
-# N8N Implementation Roadmap - Technical Details & Actionable Steps
+# N8N Implementation Roadmap - MVP Edition
 
 ## Executive Summary
 
-This document provides a detailed technical roadmap for implementing the expanded n8n integration plan for Tampana. It includes specific implementation steps, code examples, architecture decisions, and technical specifications for each phase of development.
+This document provides a practical technical roadmap for implementing the MVP n8n integration for Tampana. It focuses on building a working system quickly with basic, reliable functionality rather than complex features.
 
 ## Current Implementation Status
 
@@ -15,14 +15,15 @@ This document provides a detailed technical roadmap for implementing the expande
 - **Type Definitions**: Comprehensive TypeScript interfaces
 
 ### 🔄 In Progress
-- **Real-time Data Streaming**: WebSocket implementation
-- **Advanced Pattern Detection**: ML-based emotional analysis
-- **External Integrations**: Calendar and health platform connections
+- **Real-time Data Streaming**: Basic WebSocket implementation
+- **Data Validation**: Simple input validation
+- **Error Handling**: Basic retry mechanisms
 
-### 📋 Planned Features
-- **Machine Learning Engine**: Predictive analytics and pattern recognition
-- **Advanced Analytics Dashboard**: Comprehensive reporting and visualization
-- **Security Enhancements**: Advanced authentication and encryption
+### 📋 Planned Features (MVP)
+- **Simple Pattern Detection**: Basic emotional trend analysis
+- **Basic Workflow Templates**: 3-5 simple workflows
+- **Simple Notifications**: Basic email/message sending
+- **Basic Testing**: Essential functionality testing
 
 ## Phase 1: Foundation & Core Integration (Week 1-2) ✅ COMPLETED
 
@@ -38,8 +39,8 @@ The foundation is solid with the following components:
 2. **Service Layer**
    - Webhook management and delivery
    - Connection testing and status monitoring
-   - Data transformation and processing
-   - Basic pattern detection algorithms
+   - Basic data transformation
+   - Simple pattern detection
 
 3. **Data Management**
    - Emotional event data structures
@@ -54,29 +55,23 @@ Tampana App → n8nService → Webhook → n8n.alw.lol → Workflow Execution
 Local Storage → Data Processing → Validation → N8N Instance
 ```
 
-## Phase 2: Enhanced Data Processing (Week 3-4) 🔄 IN PROGRESS
+## Phase 2: Essential Features (Week 3-4) 🔄 IN PROGRESS
 
-### 2.1 Real-time Data Streaming with WebSocket Support
+### 2.1 Basic Real-time Data Streaming
 
 #### Implementation Steps
 
-1. **Add WebSocket Service**
+1. **Simple WebSocket Service**
 ```typescript
 // src/services/websocketService.ts
 export class WebSocketService {
   private ws: WebSocket | null = null;
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
   
   connect(url: string): Promise<void> {
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket(url);
       
-      this.ws.onopen = () => {
-        this.reconnectAttempts = 0;
-        resolve();
-      };
-      
+      this.ws.onopen = () => resolve();
       this.ws.onerror = (error) => reject(error);
     });
   }
@@ -86,10 +81,14 @@ export class WebSocketService {
       this.ws.send(JSON.stringify(data));
     }
   }
+  
+  disconnect(): void {
+    this.ws?.close();
+  }
 }
 ```
 
-2. **Integrate with n8nService**
+2. **Basic Integration with n8nService**
 ```typescript
 // src/services/n8nService.ts - Add to existing class
 private websocketService: WebSocketService;
@@ -97,12 +96,6 @@ private websocketService: WebSocketService;
 public async enableRealTimeStreaming(): Promise<boolean> {
   try {
     await this.websocketService.connect(`${this.config.baseUrl}/ws/emotions`);
-    
-    // Set up event listeners for real-time data
-    this.websocketService.onMessage((data) => {
-      this.processRealTimeData(data);
-    });
-    
     return true;
   } catch (error) {
     console.error('Real-time streaming failed:', error);
@@ -111,73 +104,16 @@ public async enableRealTimeStreaming(): Promise<boolean> {
 }
 ```
 
-3. **Update Dashboard UI**
-```typescript
-// src/components/N8NDashboard.tsx - Add real-time status
-const [realTimeEnabled, setRealTimeEnabled] = useState(false);
-
-const toggleRealTime = async () => {
-  if (realTimeEnabled) {
-    await n8nService.disableRealTimeStreaming();
-    setRealTimeEnabled(false);
-  } else {
-    const success = await n8nService.enableRealTimeStreaming();
-    setRealTimeEnabled(success);
-  }
-};
-```
-
 #### Technical Requirements
-- WebSocket server endpoint on n8n instance
-- Connection pooling and reconnection logic
-- Data compression for large datasets
-- Error handling and fallback mechanisms
+- Basic WebSocket server endpoint on n8n instance
+- Simple connection handling
+- Basic error handling
 
-### 2.2 Advanced Data Transformation Pipelines
+### 2.2 Basic Data Validation
 
 #### Implementation Steps
 
-1. **Create Data Transformation Engine**
-```typescript
-// src/services/dataTransformationService.ts
-export class DataTransformationService {
-  transformEmotionalData(events: EmotionalEvent[]): ProcessedEmotionalData {
-    return {
-      events: events.map(this.transformEvent),
-      summary: this.generateSummary(events),
-      patterns: this.detectPatterns(events),
-      correlations: this.findCorrelations(events)
-    };
-  }
-  
-  private transformEvent(event: EmotionalEvent): ProcessedEmotionalEvent {
-    return {
-      ...event,
-      normalizedIntensity: this.normalizeIntensity(event.intensity),
-      emotionalCategory: this.categorizeEmotion(event.emotion),
-      timeOfDay: this.extractTimeOfDay(event.timestamp),
-      dayOfWeek: this.extractDayOfWeek(event.timestamp)
-    };
-  }
-  
-  private detectPatterns(events: EmotionalEvent[]): EmotionalPattern[] {
-    // Implement pattern detection algorithms
-    const patterns: EmotionalPattern[] = [];
-    
-    // Weekly patterns
-    const weeklyPatterns = this.analyzeWeeklyPatterns(events);
-    patterns.push(...weeklyPatterns);
-    
-    // Intensity trends
-    const intensityTrends = this.analyzeIntensityTrends(events);
-    patterns.push(...intensityTrends);
-    
-    return patterns;
-  }
-}
-```
-
-2. **Add Data Validation**
+1. **Simple Data Validator**
 ```typescript
 // src/utils/dataValidation.ts
 export class DataValidator {
@@ -204,32 +140,47 @@ export class DataValidator {
 }
 ```
 
-### 2.3 Retry Mechanisms and Error Handling
+2. **Integrate with Service**
+```typescript
+// src/services/n8nService.ts - Update webhook method
+public async sendWebhook(eventType: WebhookPayload['eventType'], data: any): Promise<boolean> {
+  // Basic validation
+  const validation = DataValidator.validateEmotionalEvent(data);
+  if (!validation.isValid) {
+    console.error('Data validation failed:', validation.errors);
+    return false;
+  }
+  
+  // Continue with existing logic...
+}
+```
+
+### 2.3 Simple Retry Mechanism
 
 #### Implementation Steps
 
-1. **Enhanced Webhook Delivery with Retry Logic**
+1. **Basic Retry Logic**
 ```typescript
 // src/services/n8nService.ts - Update webhook method
 public async sendWebhookWithRetry(
   eventType: WebhookPayload['eventType'], 
   data: any, 
-  maxRetries: number = 3
+  maxRetries: number = 2
 ): Promise<boolean> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const success = await this.sendWebhook(eventType, data);
       if (success) return true;
       
-      // Exponential backoff
-      const delay = Math.pow(2, attempt) * 1000;
-      await new Promise(resolve => setTimeout(resolve, delay));
+      // Simple delay between retries
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
       
     } catch (error) {
       console.error(`Webhook attempt ${attempt} failed:`, error);
       
       if (attempt === maxRetries) {
-        this.updateSyncStatus('error', `Webhook failed after ${maxRetries} attempts`);
         return false;
       }
     }
@@ -239,401 +190,156 @@ public async sendWebhookWithRetry(
 }
 ```
 
-2. **Circuit Breaker Pattern**
-```typescript
-// src/services/circuitBreaker.ts
-export class CircuitBreaker {
-  private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
-  private failureCount = 0;
-  private lastFailureTime = 0;
-  private readonly threshold = 5;
-  private readonly timeout = 60000; // 1 minute
-  
-  async execute<T>(fn: () => Promise<T>): Promise<T> {
-    if (this.state === 'OPEN') {
-      if (Date.now() - this.lastFailureTime > this.timeout) {
-        this.state = 'HALF_OPEN';
-      } else {
-        throw new Error('Circuit breaker is OPEN');
-      }
-    }
-    
-    try {
-      const result = await fn();
-      this.onSuccess();
-      return result;
-    } catch (error) {
-      this.onFailure();
-      throw error;
-    }
-  }
-  
-  private onSuccess(): void {
-    this.failureCount = 0;
-    this.state = 'CLOSED';
-  }
-  
-  private onFailure(): void {
-    this.failureCount++;
-    this.lastFailureTime = Date.now();
-    
-    if (this.failureCount >= this.threshold) {
-      this.state = 'OPEN';
-    }
-  }
-}
-```
+## Phase 3: Basic Automation (Week 5-6) 📋 PLANNED
 
-## Phase 3: Advanced Workflow Features (Week 5-6) 📋 PLANNED
-
-### 3.1 Machine Learning Integration
+### 3.1 Simple Pattern Detection
 
 #### Implementation Steps
 
-1. **Create ML Service Interface**
-```typescript
-// src/services/mlService.ts
-export interface MLPrediction {
-  emotion: string;
-  confidence: number;
-  factors: string[];
-  nextPredictedEmotion?: string;
-  wellnessScore: number;
-}
-
-export class MLService {
-  async predictEmotionalTrend(events: EmotionalEvent[]): Promise<MLPrediction[]> {
-    // Integrate with TensorFlow.js or external ML API
-    const features = this.extractFeatures(events);
-    const predictions = await this.model.predict(features);
-    
-    return this.formatPredictions(predictions);
-  }
-  
-  async detectAnomalies(events: EmotionalEvent[]): Promise<EmotionalAnomaly[]> {
-    // Implement anomaly detection algorithms
-    const anomalies: EmotionalAnomaly[] = [];
-    
-    // Statistical anomaly detection
-    const intensityStats = this.calculateIntensityStatistics(events);
-    const anomalies = events.filter(event => 
-      Math.abs(event.intensity - intensityStats.mean) > 2 * intensityStats.standardDeviation
-    );
-    
-    return anomalies.map(anomaly => ({
-      event: anomaly,
-      type: 'intensity_anomaly',
-      severity: 'high',
-      description: 'Unusual emotional intensity detected'
-    }));
-  }
-}
-```
-
-2. **Pattern Recognition Engine**
+1. **Basic Pattern Recognition**
 ```typescript
 // src/services/patternRecognitionService.ts
 export class PatternRecognitionService {
-  detectEmotionalCycles(events: EmotionalEvent[]): EmotionalCycle[] {
-    const cycles: EmotionalCycle[] = [];
+  detectBasicPatterns(events: EmotionalEvent[]): BasicPattern[] {
+    const patterns: BasicPattern[] = [];
     
-    // Detect daily patterns
-    const dailyPatterns = this.analyzeDailyPatterns(events);
-    cycles.push(...dailyPatterns);
+    if (events.length < 3) return patterns;
     
-    // Detect weekly patterns
-    const weeklyPatterns = this.analyzeWeeklyPatterns(events);
-    cycles.push(...weeklyPatterns);
+    // Check for consistent negative emotions (last 3 events)
+    const recentEvents = events.slice(-3);
+    const negativeEmotions = ['sad', 'angry', 'anxious', 'stressed'];
     
-    // Detect seasonal patterns
-    const seasonalPatterns = this.analyzeSeasonalPatterns(events);
-    cycles.push(...seasonalPatterns);
+    const negativeCount = recentEvents.filter(event => 
+      negativeEmotions.includes(event.emotion.toLowerCase())
+    ).length;
     
-    return cycles;
-  }
-  
-  private analyzeDailyPatterns(events: EmotionalEvent[]): DailyPattern[] {
-    const hourlyData = new Array(24).fill(0).map(() => ({
-      emotions: new Map<string, number>(),
-      totalIntensity: 0,
-      count: 0
-    }));
+    if (negativeCount >= 2) {
+      patterns.push({
+        type: 'negative_trend',
+        severity: 'medium',
+        description: 'Consistent negative emotions detected',
+        events: recentEvents
+      });
+    }
     
-    events.forEach(event => {
-      const hour = new Date(event.timestamp).getHours();
-      const hourData = hourlyData[hour];
-      
-      hourData.emotions.set(event.emotion, (hourData.emotions.get(event.emotion) || 0) + 1);
-      hourData.totalIntensity += event.intensity;
-      hourData.count++;
-    });
-    
-    return hourlyData.map((data, hour) => ({
-      hour,
-      dominantEmotion: this.findDominantEmotion(data.emotions),
-      averageIntensity: data.count > 0 ? data.totalIntensity / data.count : 0,
-      eventCount: data.count
-    }));
+    return patterns;
   }
 }
 ```
 
-### 3.2 Natural Language Processing
-
-#### Implementation Steps
-
-1. **Sentiment Analysis Service**
+2. **Integrate with n8nService**
 ```typescript
-// src/services/nlpService.ts
-export class NLPService {
-  async analyzeSentiment(text: string): Promise<SentimentAnalysis> {
-    // Integrate with external NLP service (e.g., Google Cloud NLP, AWS Comprehend)
-    const response = await fetch('/api/nlp/sentiment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
+// src/services/n8nService.ts - Add pattern detection
+public async checkForPatterns(events: EmotionalEvent[]): Promise<boolean> {
+  const patterns = this.patternService.detectBasicPatterns(events);
+  
+  if (patterns.length > 0) {
+    // Send webhook for pattern detection
+    return await this.sendWebhook('pattern_detected', {
+      patterns,
+      timestamp: new Date().toISOString()
     });
-    
-    return response.json();
   }
   
-  async extractEmotionalKeywords(text: string): Promise<string[]> {
-    const keywords = await this.analyzeText(text);
-    return keywords.filter(keyword => 
-      this.emotionalKeywords.includes(keyword.toLowerCase())
-    );
-  }
-  
-  async categorizeEmotionalContent(text: string): Promise<EmotionalCategory> {
-    const sentiment = await this.analyzeSentiment(text);
-    const keywords = await this.extractEmotionalKeywords(text);
-    
-    return {
-      primaryEmotion: this.mapSentimentToEmotion(sentiment.score),
-      intensity: Math.abs(sentiment.score) * 10,
-      keywords,
-      confidence: sentiment.confidence
-    };
-  }
+  return false;
 }
 ```
 
-## Phase 4: External Integrations (Week 7-8) 📋 PLANNED
-
-### 4.1 Calendar Integration
+### 3.2 Basic Workflow Templates
 
 #### Implementation Steps
 
-1. **Calendar Service Interface**
+1. **Create Simple Template Structure**
 ```typescript
-// src/services/calendarService.ts
-export interface CalendarEvent {
+// src/types/n8n.ts - Add to existing interfaces
+export interface BasicWorkflowTemplate {
   id: string;
-  title: string;
-  start: Date;
-  end: Date;
-  description?: string;
-  location?: string;
-  attendees?: string[];
-}
-
-export abstract class CalendarService {
-  abstract authenticate(): Promise<boolean>;
-  abstract getEvents(startDate: Date, endDate: Date): Promise<CalendarEvent[]>;
-  abstract createEvent(event: CalendarEvent): Promise<string>;
-  abstract updateEvent(eventId: string, event: Partial<CalendarEvent>): Promise<boolean>;
-  abstract deleteEvent(eventId: string): Promise<boolean>;
-}
-
-export class GoogleCalendarService extends CalendarService {
-  private accessToken: string | null = null;
-  
-  async authenticate(): Promise<boolean> {
-    // Implement Google OAuth flow
-    const authResult = await this.googleAuth.authenticate();
-    this.accessToken = authResult.accessToken;
-    return !!this.accessToken;
-  }
-  
-  async createWellnessEvent(emotion: string, intensity: number): Promise<string> {
-    const event: CalendarEvent = {
-      title: `Wellness Check-in: ${emotion}`,
-      start: new Date(),
-      end: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
-      description: `Scheduled wellness activity based on emotional state: ${emotion} (intensity: ${intensity}/10)`
-    };
-    
-    return this.createEvent(event);
-  }
-}
-```
-
-2. **Integration with n8n Workflows**
-```typescript
-// src/services/n8nService.ts - Add calendar integration
-public async scheduleWellnessActivity(emotion: string, intensity: number): Promise<boolean> {
-  try {
-    // Create calendar event
-    const calendarService = new GoogleCalendarService();
-    await calendarService.authenticate();
-    const eventId = await calendarService.createWellnessEvent(emotion, intensity);
-    
-    // Send webhook to n8n for further processing
-    await this.sendWebhook('wellness_scheduled', {
-      emotion,
-      intensity,
-      calendarEventId: eventId,
-      scheduledTime: new Date().toISOString()
-    });
-    
-    return true;
-  } catch (error) {
-    console.error('Failed to schedule wellness activity:', error);
-    return false;
-  }
-}
-```
-
-### 4.2 Health Platform Integration
-
-#### Implementation Steps
-
-1. **Health Data Service**
-```typescript
-// src/services/healthService.ts
-export interface HealthData {
-  steps: number;
-  heartRate: number;
-  sleepHours: number;
-  caloriesBurned: number;
-  activeMinutes: number;
-}
-
-export class HealthService {
-  async getHealthData(date: Date): Promise<HealthData> {
-    // Integrate with Apple Health, Google Fit, or Fitbit
-    const [steps, heartRate, sleep, calories, active] = await Promise.all([
-      this.getSteps(date),
-      this.getHeartRate(date),
-      this.getSleepHours(date),
-      this.getCaloriesBurned(date),
-      this.getActiveMinutes(date)
-    ]);
-    
-    return { steps, heartRate, sleepHours: sleep, caloriesBurned: calories, activeMinutes: active };
-  }
-  
-  async correlateHealthWithEmotions(
-    healthData: HealthData, 
-    emotions: EmotionalEvent[]
-  ): Promise<HealthEmotionCorrelation[]> {
-    const correlations: HealthEmotionCorrelation[] = [];
-    
-    // Analyze correlation between physical activity and emotional state
-    const activityCorrelation = this.analyzeActivityEmotionCorrelation(healthData, emotions);
-    correlations.push(activityCorrelation);
-    
-    // Analyze correlation between sleep and emotional state
-    const sleepCorrelation = this.analyzeSleepEmotionCorrelation(healthData, emotions);
-    correlations.push(sleepCorrelation);
-    
-    return correlations;
-  }
-}
-```
-
-## Phase 5: Advanced Analytics & Reporting (Week 9-10) 📋 PLANNED
-
-### 5.1 Comprehensive Analytics Dashboard
-
-#### Implementation Steps
-
-1. **Analytics Dashboard Component**
-```typescript
-// src/components/AnalyticsDashboard.tsx
-export const AnalyticsDashboard: React.FC = () => {
-  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-  
-  useEffect(() => {
-    loadAnalyticsData(timeRange);
-  }, [timeRange]);
-  
-  const loadAnalyticsData = async (range: string) => {
-    const data = await analyticsService.getAnalytics(range);
-    setAnalyticsData(data);
+  name: string;
+  description: string;
+  category: 'notification' | 'export' | 'basic';
+  config: {
+    trigger: 'webhook' | 'schedule';
+    actions: string[];
   };
-  
-  return (
-    <DashboardContainer>
-      <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
-      
-      <MetricsGrid>
-        <MetricCard title="Emotional Wellness Score" value={analyticsData?.wellnessScore} />
-        <MetricCard title="Pattern Recognition" value={analyticsData?.patternsDetected} />
-        <MetricCard title="Automation Success Rate" value={analyticsData?.automationRate} />
-      </MetricsGrid>
-      
-      <ChartsSection>
-        <EmotionalTrendChart data={analyticsData?.trends} />
-        <PatternAnalysisChart data={analyticsData?.patterns} />
-        <CorrelationChart data={analyticsData?.correlations} />
-      </ChartsSection>
-      
-      <InsightsPanel insights={analyticsData?.insights} />
-    </DashboardContainer>
-  );
-};
+}
+
+// src/services/n8nService.ts - Add template methods
+public async getBasicTemplates(): Promise<BasicWorkflowTemplate[]> {
+  return [
+    {
+      id: 'basic-notification',
+      name: 'Basic Notification',
+      description: 'Send notification when emotion is logged',
+      category: 'notification',
+      config: {
+        trigger: 'webhook',
+        actions: ['send_email', 'log_data']
+      }
+    },
+    {
+      id: 'weekly-export',
+      name: 'Weekly Export',
+      description: 'Export emotional data weekly',
+      category: 'export',
+      config: {
+        trigger: 'schedule',
+        actions: ['export_csv', 'send_report']
+      }
+    }
+  ];
+}
 ```
 
-2. **Analytics Service**
+### 3.3 Simple Notification System
+
+#### Implementation Steps
+
+1. **Basic Notification Service**
 ```typescript
-// src/services/analyticsService.ts
-export class AnalyticsService {
-  async getAnalytics(timeRange: string): Promise<AnalyticsData> {
-    const events = await this.getEmotionalEvents(timeRange);
-    const healthData = await this.getHealthData(timeRange);
-    
-    return {
-      wellnessScore: this.calculateWellnessScore(events),
-      trends: this.analyzeTrends(events),
-      patterns: this.detectPatterns(events),
-      correlations: this.findCorrelations(events, healthData),
-      insights: this.generateInsights(events, healthData),
-      automationRate: await this.getAutomationSuccessRate(timeRange)
-    };
+// src/services/notificationService.ts
+export class NotificationService {
+  async sendBasicEmail(to: string, subject: string, body: string): Promise<boolean> {
+    try {
+      // Simple email sending (could use a service like SendGrid, Mailgun, etc.)
+      const response = await fetch('/api/notifications/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, subject, body })
+      });
+      
+      return response.ok;
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      return false;
+    }
   }
   
-  private calculateWellnessScore(events: EmotionalEvent[]): number {
-    // Implement wellness scoring algorithm
-    const positiveEmotions = ['happy', 'content', 'grateful', 'excited', 'calm'];
-    const negativeEmotions = ['sad', 'angry', 'anxious', 'stressed', 'depressed'];
-    
-    let score = 50; // Base score
-    
-    events.forEach(event => {
-      if (positiveEmotions.includes(event.emotion)) {
-        score += (event.intensity / 10) * 5;
-      } else if (negativeEmotions.includes(event.emotion)) {
-        score -= (event.intensity / 10) * 5;
+  async sendBasicNotification(message: string): Promise<boolean> {
+    try {
+      // Simple notification (could be browser notification, etc.)
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Tampana', { body: message });
+        return true;
       }
-    });
-    
-    return Math.max(0, Math.min(100, score));
+      return false;
+    } catch (error) {
+      console.error('Failed to send notification:', error);
+      return false;
+    }
   }
 }
 ```
 
-## Phase 6: Testing & Deployment (Week 11-12) 📋 PLANNED
+## Phase 4: Testing & Polish (Week 7-8) 📋 PLANNED
 
-### 6.1 Comprehensive Testing Suite
+### 4.1 Basic Testing
 
 #### Implementation Steps
 
-1. **Unit Tests**
+1. **Simple Unit Tests**
 ```typescript
 // src/services/__tests__/n8nService.test.ts
-describe('N8NService', () => {
+describe('N8NService - Basic Tests', () => {
   let service: N8NService;
   
   beforeEach(() => {
@@ -647,14 +353,9 @@ describe('N8NService', () => {
       const result = await service.sendWebhook('emotion_logged', { emotion: 'happy' });
       
       expect(result).toBe(true);
-      expect(mockAxios).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ eventType: 'emotion_logged' }),
-        expect.any(Object)
-      );
     });
     
-    it('should handle webhook failures gracefully', async () => {
+    it('should handle webhook failures', async () => {
       jest.spyOn(axios, 'post').mockRejectedValue(new Error('Network error'));
       
       const result = await service.sendWebhook('emotion_logged', { emotion: 'happy' });
@@ -665,164 +366,153 @@ describe('N8NService', () => {
 });
 ```
 
-2. **Integration Tests**
+2. **Basic Integration Tests**
 ```typescript
-// src/tests/integration/n8nIntegration.test.ts
-describe('N8N Integration', () => {
-  it('should complete full data flow from emotion to n8n', async () => {
-    // Create emotional event
-    const event = createMockEmotionalEvent();
+// src/tests/integration/basicIntegration.test.ts
+describe('Basic N8N Integration', () => {
+  it('should complete basic data flow', async () => {
+    // Create simple emotional event
+    const event = { emotion: 'happy', intensity: 8, timestamp: new Date().toISOString() };
     
     // Process through service
     const success = await n8nService.syncEmotionalData([event]);
     
-    // Verify webhook was sent
+    // Verify basic success
     expect(success).toBe(true);
-    
-    // Verify n8n received data
-    const webhookData = await getWebhookData();
-    expect(webhookData).toContainEqual(
-      expect.objectContaining({ eventType: 'daily_summary' })
-    );
   });
 });
 ```
 
-3. **Performance Tests**
-```typescript
-// src/tests/performance/loadTest.ts
-describe('Performance Tests', () => {
-  it('should handle 1000 concurrent emotional events', async () => {
-    const events = generateMockEvents(1000);
-    const startTime = Date.now();
-    
-    const results = await Promise.all(
-      events.map(event => n8nService.sendWebhook('emotion_logged', event))
-    );
-    
-    const endTime = Date.now();
-    const duration = endTime - startTime;
-    
-    expect(duration).toBeLessThan(5000); // Should complete within 5 seconds
-    expect(results.every(result => result === true)).toBe(true);
-  });
-});
-```
-
-### 6.2 Security Testing
+### 4.2 User Documentation
 
 #### Implementation Steps
 
-1. **Security Audit Scripts**
-```typescript
-// src/scripts/securityAudit.ts
-export class SecurityAuditor {
-  async runSecurityAudit(): Promise<SecurityAuditResult> {
-    const results: SecurityAuditResult = {
-      vulnerabilities: [],
-      recommendations: [],
-      score: 100
-    };
-    
-    // Test authentication
-    const authResult = await this.testAuthentication();
-    if (!authResult.secure) {
-      results.vulnerabilities.push('Weak authentication detected');
-      results.score -= 20;
-    }
-    
-    // Test data encryption
-    const encryptionResult = await this.testDataEncryption();
-    if (!encryptionResult.secure) {
-      results.vulnerabilities.push('Data encryption issues detected');
-      results.score -= 30;
-    }
-    
-    // Test API security
-    const apiResult = await this.testAPISecurity();
-    if (!apiResult.secure) {
-      results.vulnerabilities.push('API security vulnerabilities detected');
-      results.score -= 25;
-    }
-    
-    return results;
-  }
-}
+1. **Simple User Guide**
+```markdown
+# N8N Integration - Quick Start Guide
+
+## Setup
+1. Open Tampana and go to N8N Dashboard
+2. Enter your n8n URL: https://n8n.alw.lol
+3. Click "Test Connection"
+4. If successful, click "Save Configuration"
+
+## Basic Usage
+1. Log emotions as usual in Tampana
+2. Data will automatically be sent to n8n
+3. Check the dashboard for status updates
+4. View basic patterns and trends
+
+## Troubleshooting
+- If connection fails, check your n8n instance is running
+- Verify the URL is correct
+- Check browser console for error messages
 ```
 
-## Technical Architecture Decisions
+## Technical Architecture Decisions (MVP)
 
 ### 1. State Management
-- **Local State**: Use React useState for component-level state
-- **Global State**: Consider Zustand or Redux Toolkit for complex state
-- **Persistence**: localStorage for configuration, IndexedDB for large datasets
+- **Keep it Simple**: Use React useState for component-level state
+- **No Complex State**: Avoid Redux or complex state management
+- **Local Storage**: Use localStorage for configuration
 
 ### 2. Data Flow
-- **Unidirectional**: Follow React data flow patterns
-- **Event-Driven**: Use custom events for cross-component communication
-- **Async Handling**: Implement proper error boundaries and loading states
+- **Simple and Direct**: Minimal data transformation
+- **Basic Validation**: Simple input checking
+- **Error Handling**: Basic error logging and user feedback
 
-### 3. Performance Optimization
-- **Lazy Loading**: Implement code splitting for large components
-- **Memoization**: Use React.memo and useMemo for expensive calculations
-- **Virtualization**: Implement virtual scrolling for large datasets
+### 3. Performance
+- **No Premature Optimization**: Focus on functionality first
+- **Simple Caching**: Basic localStorage caching
+- **Lazy Loading**: Only for large components
 
-### 4. Security Considerations
-- **Input Validation**: Validate all user inputs and API responses
-- **Data Sanitization**: Sanitize data before storage and transmission
-- **Access Control**: Implement proper authentication and authorization
-- **Audit Logging**: Log all security-relevant events
+### 4. Security
+- **Basic Security**: API key authentication
+- **Simple Validation**: Basic input sanitization
+- **HTTPS Only**: Ensure secure transmission
 
-## Deployment Strategy
+## Deployment Strategy (MVP)
 
 ### 1. Development Environment
-- **Local Development**: Use Vite dev server with hot reload
-- **Environment Variables**: Configure different settings for dev/staging/prod
-- **Mock Services**: Use mock data for development and testing
+- **Local Development**: Use existing Vite setup
+- **Simple Testing**: Basic manual testing
+- **Mock Data**: Use existing mock data
 
-### 2. Staging Environment
-- **Staging Server**: Deploy to staging environment for testing
-- **Integration Testing**: Test with real n8n instance
-- **User Acceptance Testing**: Gather feedback from stakeholders
+### 2. Testing Environment
+- **Basic Testing**: Test with your n8n instance
+- **User Testing**: Simple user feedback
+- **Bug Fixes**: Fix critical issues only
 
-### 3. Production Environment
-- **Production Server**: Deploy to production environment
-- **Monitoring**: Implement comprehensive monitoring and alerting
-- **Backup Strategy**: Implement data backup and recovery procedures
+### 3. Production
+- **Simple Deployment**: Basic deployment process
+- **Monitoring**: Simple error logging
+- **Updates**: Basic version management
 
-## Monitoring & Maintenance
+## What We're NOT Building (Yet)
 
-### 1. Application Monitoring
-- **Performance Metrics**: Monitor response times and resource usage
-- **Error Tracking**: Implement error logging and alerting
-- **User Analytics**: Track user behavior and feature usage
+### Complex Features
+- Machine learning algorithms
+- Advanced analytics dashboards
+- Multiple external integrations
+- Complex data pipelines
+- Advanced security features
 
-### 2. Infrastructure Monitoring
-- **Server Health**: Monitor server resources and availability
-- **Database Performance**: Monitor database queries and performance
-- **Network Latency**: Monitor network connectivity and latency
+### Enterprise Features
+- Multi-tenant architecture
+- Advanced user management
+- Complex workflow builders
+- Enterprise monitoring
+- Advanced reporting
 
-### 3. Security Monitoring
-- **Access Logs**: Monitor authentication and authorization events
-- **Threat Detection**: Implement intrusion detection and prevention
-- **Vulnerability Scanning**: Regular security scans and updates
+## MVP Success Criteria
+
+### Technical
+- **Basic Functionality**: Core features work reliably
+- **Simple Integration**: Easy to connect to n8n
+- **Basic Error Handling**: Graceful failure handling
+- **Simple Testing**: Basic test coverage
+
+### User Experience
+- **Easy Setup**: Simple configuration process
+- **Reliable Operation**: Few crashes or errors
+- **Basic Feedback**: Users understand what's happening
+- **Simple Interface**: Easy to navigate and use
+
+### Business
+- **Working Product**: Something users can actually use
+- **User Feedback**: Understanding of user needs
+- **Iteration Path**: Clear next steps for improvement
+- **Stable Foundation**: Base for future development
+
+## Next Steps (MVP Focus)
+
+### Immediate (This Week)
+1. **Complete basic WebSocket implementation**
+2. **Add simple data validation**
+3. **Test with your n8n instance**
+4. **Fix any critical bugs**
+
+### Short Term (Next 2 Weeks)
+1. **Implement basic pattern detection**
+2. **Create 3-5 simple workflow templates**
+3. **Add basic notification system**
+4. **Write simple user documentation**
+
+### Medium Term (Next Month)
+1. **User testing and feedback**
+2. **Bug fixes and improvements**
+3. **Basic performance optimization**
+4. **Plan for next iteration**
 
 ## Conclusion
 
-This implementation roadmap provides a comprehensive guide for building the expanded n8n integration for Tampana. The phased approach ensures that each component is properly tested and validated before moving to the next phase.
+This MVP approach focuses on building a working n8n integration quickly and reliably. We're prioritizing:
 
-**Key Success Factors:**
-- Maintain code quality through comprehensive testing
-- Implement proper error handling and fallback mechanisms
-- Focus on user experience and performance
-- Ensure security and privacy compliance
-- Build scalable and maintainable architecture
+1. **Functionality over features** - Get the basics working well
+2. **Simplicity over complexity** - Easy to understand and maintain
+3. **Reliability over performance** - Stable operation is key
+4. **User feedback over assumptions** - Build what users actually need
 
-**Next Steps:**
-1. Review and approve this roadmap
-2. Set up development environment and tooling
-3. Begin Phase 2 implementation
-4. Establish testing and quality assurance processes
-5. Plan for Phase 3 and beyond
+The goal is to have a solid foundation that users can rely on, rather than a complex system that's hard to maintain. We can always add more features later based on real user needs and feedback.
 
-The roadmap provides a clear path from the current solid foundation to a comprehensive emotional wellness automation platform that leverages the full power of n8n workflows and modern technologies.
+**Remember**: A simple system that works is better than a complex system that doesn't.
