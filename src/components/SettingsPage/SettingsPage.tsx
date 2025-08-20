@@ -124,6 +124,42 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
   const { theme } = useTheme();
   const [autoSave, setAutoSave] = useState(true);
   const [defaultView, setDefaultView] = useState('week');
+  const [n8nEnabled, setN8nEnabled] = useState<boolean>(false);
+  const [n8nBaseUrl, setN8nBaseUrl] = useState<string>('');
+  const [n8nEventPath, setN8nEventPath] = useState<string>('/webhook/tampana/event-change');
+  const [n8nExportPath, setN8nExportPath] = useState<string>('/webhook/tampana/export');
+  const [n8nSummaryPath, setN8nSummaryPath] = useState<string>('/webhook/tampana/summary');
+  const [n8nAuthHeader, setN8nAuthHeader] = useState<string>('');
+  const [n8nAuthToken, setN8nAuthToken] = useState<string>('');
+
+  // Load saved n8n config
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem('tampanaN8N') || '{}';
+      const cfg = JSON.parse(raw);
+      setN8nEnabled(Boolean(cfg.enabled));
+      setN8nBaseUrl(cfg.baseUrl || '');
+      setN8nEventPath(cfg.eventPath || '/webhook/tampana/event-change');
+      setN8nExportPath(cfg.exportPath || '/webhook/tampana/export');
+      setN8nSummaryPath(cfg.summaryPath || '/webhook/tampana/summary');
+      setN8nAuthHeader(cfg.authHeader || '');
+      setN8nAuthToken(cfg.authToken || '');
+    } catch (e) { /* ignore invalid JSON */ }
+  }, []);
+
+  const saveN8N = () => {
+    const cfg = {
+      enabled: n8nEnabled,
+      baseUrl: n8nBaseUrl,
+      eventPath: n8nEventPath,
+      exportPath: n8nExportPath,
+      summaryPath: n8nSummaryPath,
+      authHeader: n8nAuthHeader || undefined,
+      authToken: n8nAuthToken || undefined,
+    };
+    localStorage.setItem('tampanaN8N', JSON.stringify(cfg));
+    alert('n8n settings saved');
+  };
 
   const handleReset = () => {
     if (confirm('Are you sure you want to reset all settings to default? This action cannot be undone.')) {
@@ -270,6 +306,108 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
         </div>
       </div>
       
+      <div className="settings-section">
+        <h3>🔗 n8n Integration</h3>
+
+        <div className="setting-item">
+          <label>
+            <input
+              type="checkbox"
+              checked={n8nEnabled}
+              onChange={() => setN8nEnabled(!n8nEnabled)}
+            />
+            Enable n8n integration
+          </label>
+          <div className="setting-description">
+            Send event changes and exports to your n8n workflows
+          </div>
+        </div>
+
+        <div className="setting-item">
+          <label>
+            Base URL
+            <input
+              type="text"
+              value={n8nBaseUrl}
+              onChange={(e) => setN8nBaseUrl(e.target.value)}
+              placeholder="https://n8n.alw.lol"
+              style={{ marginLeft: '15px' }}
+            />
+          </label>
+          <div className="setting-description">Your n8n instance base URL</div>
+        </div>
+
+        <div className="setting-item">
+          <label>
+            Event Path
+            <input
+              type="text"
+              value={n8nEventPath}
+              onChange={(e) => setN8nEventPath(e.target.value)}
+              placeholder="/webhook/tampana/event-change"
+              style={{ marginLeft: '15px' }}
+            />
+          </label>
+        </div>
+
+        <div className="setting-item">
+          <label>
+            Export Path
+            <input
+              type="text"
+              value={n8nExportPath}
+              onChange={(e) => setN8nExportPath(e.target.value)}
+              placeholder="/webhook/tampana/export"
+              style={{ marginLeft: '15px' }}
+            />
+          </label>
+        </div>
+
+        <div className="setting-item">
+          <label>
+            Summary Path
+            <input
+              type="text"
+              value={n8nSummaryPath}
+              onChange={(e) => setN8nSummaryPath(e.target.value)}
+              placeholder="/webhook/tampana/summary"
+              style={{ marginLeft: '15px' }}
+            />
+          </label>
+        </div>
+
+        <div className="setting-item">
+          <label>
+            Auth Header
+            <input
+              type="text"
+              value={n8nAuthHeader}
+              onChange={(e) => setN8nAuthHeader(e.target.value)}
+              placeholder="X-API-Key"
+              style={{ marginLeft: '15px' }}
+            />
+          </label>
+          <div className="setting-description">Optional header to include with requests</div>
+        </div>
+
+        <div className="setting-item">
+          <label>
+            Auth Token
+            <input
+              type="password"
+              value={n8nAuthToken}
+              onChange={(e) => setN8nAuthToken(e.target.value)}
+              placeholder="your-token"
+              style={{ marginLeft: '15px' }}
+            />
+          </label>
+        </div>
+
+        <div className="setting-item" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button onClick={saveN8N} style={{ padding: '10px 16px', borderRadius: '6px', border: '1px solid ' + theme.border, background: theme.inputBackground, color: theme.inputColor }}>Save n8n Settings</button>
+        </div>
+      </div>
+
       <div className="reset-section">
         <h3>🔄 Reset Settings</h3>
         <button className="reset-button" onClick={handleReset}>
