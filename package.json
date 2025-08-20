@@ -18,10 +18,13 @@
   },
   "dependencies": {
     "@vfx-js/core": "^0.6.0",
+    "axios": "^1.6.0",
+    "date-fns": "^2.30.0",
     "gsap": "^3.13.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "styled-components": "^6.1.18",
+    "uuid": "^9.0.1",
     "veaury": "^2.6.2",
     "vue-cal": "^5.0.1-rc.25"
   },
