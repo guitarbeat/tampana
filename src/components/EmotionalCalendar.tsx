@@ -281,8 +281,9 @@ const EmotionalCalendar = forwardRef<EmotionalCalendarHandle, EmotionalCalendarP
           eventOverlap={true}
           eventCellClass="emotional-event"
           defaultView={currentView}
-          style={{ 
-            height: '100%', 
+          view={currentView}
+          style={{
+            height: '100%',
             width: '100%'
           }}
           theme="dark"
