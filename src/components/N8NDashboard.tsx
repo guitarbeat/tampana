@@ -5,6 +5,7 @@ import N8NWorkflowManager from './N8NWorkflowManager';
 import N8NDataExport from './N8NDataExport';
 import n8nService from '../services/n8nService';
 import { EmotionalEvent } from '../types/n8n';
+import { glassStyle } from '../styles/glass';
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -84,16 +85,16 @@ const QuickActions = styled.div`
 `;
 
 const ActionCard = styled.div`
-  background: #2a2a2a;
+  ${glassStyle}
   border-radius: 8px;
   padding: 20px;
   text-align: center;
-  border: 1px solid #444;
   transition: all 0.2s ease;
   cursor: pointer;
-  
+
   &:hover {
     border-color: #007acc;
+    background: rgba(255, 255, 255, 0.08);
     transform: translateY(-2px);
   }
 `;
@@ -124,11 +125,10 @@ const SectionDivider = styled.div`
 `;
 
 const InfoPanel = styled.div`
-  background: #1a1a1a;
+  ${glassStyle}
   border-radius: 12px;
   padding: 24px;
   margin: 20px 0;
-  border: 1px solid #333;
 `;
 
 const InfoTitle = styled.h3`
@@ -145,10 +145,9 @@ const InfoGrid = styled.div`
 `;
 
 const InfoCard = styled.div`
-  background: #2a2a2a;
+  ${glassStyle}
   padding: 16px;
   border-radius: 8px;
-  border: 1px solid #444;
 `;
 
 const InfoLabel = styled.div`

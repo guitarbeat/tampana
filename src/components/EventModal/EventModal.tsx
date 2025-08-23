@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { EventData } from '../../types/event-data';
+import { glassStyle } from '../../styles/glass';
 
 const ModalOverlay = styled.div<{ isOpen: boolean }>`
   position: fixed;
@@ -17,7 +18,7 @@ const ModalOverlay = styled.div<{ isOpen: boolean }>`
 `;
 
 const ModalContent = styled.div`
-  background: #2a2a2a;
+  ${glassStyle}
   border-radius: 12px;
   padding: 24px;
   width: 90%;
@@ -25,7 +26,6 @@ const ModalContent = styled.div`
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  border: 1px solid #333;
 `;
 
 const ModalHeader = styled.div`
@@ -52,7 +52,7 @@ const CloseButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background: #333;
+    background: rgba(255, 255, 255, 0.1);
     color: #fff;
   }
 
