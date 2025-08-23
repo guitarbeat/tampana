@@ -310,7 +310,7 @@ const Divider = ({
   
   const toggleMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsMenuOpen(!isMenuOpen);
+    setIsMenuOpen(prev => !prev);
   };
   
   return (
