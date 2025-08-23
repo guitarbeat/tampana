@@ -485,8 +485,8 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
           
           // Adjust split position if it's out of bounds after resize
           setSplitY(prevSplitY => {
-            const minSplit = 50;
-            const maxSplit = height - 50;
+            const minSplit = DIVIDER_HEIGHT / 2;
+            const maxSplit = height - DIVIDER_HEIGHT / 2;
             return Math.max(minSplit, Math.min(maxSplit, prevSplitY));
           });
         }
@@ -551,9 +551,9 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       // Apply resistance to movement
       relativeSplitY = startSplitY + (moveEvent.clientY - startY) * resistanceFactor;
       
-      // Allow full minimization by removing minimum constraints
-      const minSplit = 0;
-      const maxSplit = containerRect.height;
+      // Allow full minimization while keeping divider within bounds
+      const minSplit = DIVIDER_HEIGHT / 2;
+      const maxSplit = containerRect.height - DIVIDER_HEIGHT / 2;
       const newSplitY = Math.max(minSplit, Math.min(maxSplit, relativeSplitY));
       
       setSplitY(newSplitY);
@@ -612,9 +612,9 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       // Apply resistance to movement
       relativeSplitY = startSplitY + (moveEvent.touches[0].clientY - startY) * resistanceFactor;
       
-      // Allow full minimization by removing minimum constraints
-      const minSplit = 0;
-      const maxSplit = containerRect.height;
+      // Allow full minimization while keeping divider within bounds
+      const minSplit = DIVIDER_HEIGHT / 2;
+      const maxSplit = containerRect.height - DIVIDER_HEIGHT / 2;
       const newSplitY = Math.max(minSplit, Math.min(maxSplit, relativeSplitY));
       
       setSplitY(newSplitY);
