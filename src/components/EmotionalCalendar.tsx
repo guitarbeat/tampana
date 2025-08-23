@@ -13,6 +13,8 @@ const CalendarContainer = styled.div`
   background: #1a1a1a;
   color: #fff;
   position: relative;
+  border-radius: 32px;
+  overflow: hidden;
 `;
 
 const CalendarWrapper = styled.div`

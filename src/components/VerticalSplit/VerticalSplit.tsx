@@ -194,7 +194,7 @@ const BottomPanel = styled(Panel)<{ $top: number; $scale?: number }>`
   top: ${props => props.$top}px;
 `;
 
-const ContentContainer = styled.div`
+const ContentContainer = styled.div<{ $padding?: number }>`
   height: 100%;
   width: 100%;
   display: flex;
@@ -203,7 +203,7 @@ const ContentContainer = styled.div`
   position: relative;
   box-sizing: border-box;
   border-radius: 32px;
-  padding: 16px;
+  padding: ${props => props.$padding ?? 16}px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
   
@@ -658,7 +658,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         $backgroundColor={effectiveBgColor}
         $scale={topScale}
       >
-        <ContentContainer>
+        <ContentContainer $padding={0}>
           {effectiveTop}
           {topViewOverlay}
         </ContentContainer>
