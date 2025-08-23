@@ -139,7 +139,6 @@ const Tooltip = styled.div`
 `;
 
 const MenuButton = styled(AccessoryButton)`
-  position: relative;
 `;
 
 const MenuContainer = styled.div<{ $isOpen: boolean }>`
@@ -396,7 +395,10 @@ const Divider = ({
           
           {/* Menu button if menu accessories exist */}
           {menuAccessories && menuAccessories.length > 0 && (
-            <div ref={menuRef}>
+            <div
+              ref={menuRef}
+              style={{ position: 'relative', display: 'inline-flex' }}
+            >
               <MenuButton
                 onClick={(e) => {
                   e.stopPropagation();
@@ -412,25 +414,23 @@ const Divider = ({
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
                   </svg>
                 )}
-                
-                {/* Menu dropdown */}
-                <MenuContainer $isOpen={isMenuOpen}>
-                  {menuAccessories.map((item, index) => (
-                    <MenuItem 
-                      key={`menu-${index}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        item.onClick();
-                        setIsMenuOpen(false);
-                      }}
-                      $color={item.color}
-                    >
-                      {item.icon}
-                      {item.label}
-                    </MenuItem>
-                  ))}
-                </MenuContainer>
               </MenuButton>
+              <MenuContainer $isOpen={isMenuOpen}>
+                {menuAccessories.map((item, index) => (
+                  <MenuItem
+                    key={`menu-${index}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      item.onClick();
+                      setIsMenuOpen(false);
+                    }}
+                    $color={item.color}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </MenuContainer>
             </div>
           )}
         </AccessoriesContainer>
