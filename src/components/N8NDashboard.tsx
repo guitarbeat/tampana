@@ -5,6 +5,7 @@ import N8NWorkflowManager from './N8NWorkflowManager';
 import N8NDataExport from './N8NDataExport';
 import n8nService from '../services/n8nService';
 import { EmotionalEvent } from '../types/n8n';
+import LoadingScreen from './LoadingScreen';
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -223,9 +224,7 @@ const N8NDashboard: React.FC = () => {
   if (isLoading) {
     return (
       <DashboardContainer>
-        <div style={{ textAlign: 'center', padding: '60px', color: '#ccc' }}>
-          Loading N8N Dashboard...
-        </div>
+        <LoadingScreen message="Loading N8N Dashboard..." fullScreen={false} />
       </DashboardContainer>
     );
   }

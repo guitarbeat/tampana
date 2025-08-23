@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import n8nService from '../services/n8nService';
 import { N8NWorkflowTemplate } from '../types/n8n';
 import { workflowTemplates } from '../data/n8nWorkflowTemplates';
+import LoadingScreen from './LoadingScreen';
 
 const Container = styled.div`
   padding: 24px;
@@ -171,14 +172,6 @@ const Alert = styled.div<{ type: 'success' | 'error' | 'info' }>`
   }}
 `;
 
-const LoadingSpinner = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
-  color: #ccc;
-`;
-
 const EmptyState = styled.div`
   text-align: center;
   padding: 40px;
@@ -282,7 +275,7 @@ const N8NWorkflowManager: React.FC = () => {
     return (
       <Container className="glass-card">
         <Title>N8N Workflow Manager</Title>
-        <LoadingSpinner>Loading workflow templates...</LoadingSpinner>
+        <LoadingScreen message="Loading workflow templates..." fullScreen={false} />
       </Container>
     );
   }
