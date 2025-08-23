@@ -2,11 +2,12 @@ import ReactDOM from 'react-dom/client';
 import { StrictMode, Suspense } from 'react';
 import App from './App';
 import ErrorBoundary from './ErrorBoundary';
+import LoadingScreen from './components/LoadingScreen';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-      <Suspense fallback={<div style={{ padding: 16 }}>Loading…</div>}>
+      <Suspense fallback={<LoadingScreen />}>
         <App />
       </Suspense>
     </ErrorBoundary>
