@@ -4,11 +4,8 @@ import n8nService from '../services/n8nService';
 import { N8NConfig, N8NResponse, SyncStatus } from '../types/n8n';
 
 const PanelContainer = styled.div`
-  background: #1a1a1a;
-  border-radius: 12px;
   padding: 24px;
   margin: 20px 0;
-  border: 1px solid #333;
 `;
 
 const Title = styled.h3`
@@ -252,7 +249,7 @@ const N8NConfigPanel: React.FC = () => {
   };
 
   return (
-    <PanelContainer>
+    <PanelContainer className="glass-card">
       <Title>N8N Integration Configuration</Title>
       
       {testResult && (
