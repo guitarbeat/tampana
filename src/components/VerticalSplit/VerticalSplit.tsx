@@ -201,7 +201,6 @@ const Panel = styled.div<{ $height: number; $backgroundColor: string; $scale?: n
   width: 100%;
   height: ${props => props.$height}px;
   background: ${props => props.$backgroundColor};
-  border-radius: 32px;
   overflow: hidden;
   box-sizing: border-box;
   transform: scale(${props => props.$scale || 1});
@@ -211,14 +210,18 @@ const Panel = styled.div<{ $height: number; $backgroundColor: string; $scale?: n
 
 const TopPanel = styled(Panel)`
   top: 0;
+  border-top-left-radius: 32px;
+  border-top-right-radius: 32px;
 `;
 
 const BottomPanel = styled(Panel)<{ $top: number; $scale?: number }>`
   top: ${props => props.$top}px;
+  border-bottom-left-radius: 32px;
+  border-bottom-right-radius: 32px;
   transition: top 0.25s ease, height 0.25s ease, transform 0.2s ease-out;
 `;
 
-const ContentContainer = styled.div`
+const ContentContainer = styled.div<{ $position: 'top' | 'bottom' }>`
   height: 100%;
   width: 100%;
   display: flex;
@@ -226,7 +229,10 @@ const ContentContainer = styled.div`
   overflow: auto;
   position: relative;
   box-sizing: border-box;
-  border-radius: 32px;
+  border-top-left-radius: ${props => props.$position === 'top' ? '32px' : '0'};
+  border-top-right-radius: ${props => props.$position === 'top' ? '32px' : '0'};
+  border-bottom-left-radius: ${props => props.$position === 'bottom' ? '32px' : '0'};
+  border-bottom-right-radius: ${props => props.$position === 'bottom' ? '32px' : '0'};
   padding: 16px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
@@ -698,7 +704,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         $backgroundColor={effectiveBgColor}
         $scale={topScale}
       >
-        <ContentContainer>
+        <ContentContainer $position="top">
           {effectiveTop}
           {topViewOverlay}
         </ContentContainer>
@@ -723,7 +729,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         $top={bottomTop}
         $scale={bottomScale}
       >
-        <ContentContainer>
+        <ContentContainer $position="bottom">
           {bottomViewOverlay ? bottomViewOverlay : effectiveBottom}
         </ContentContainer>
       </BottomPanel>
