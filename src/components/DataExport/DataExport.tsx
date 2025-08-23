@@ -8,45 +8,11 @@ const ExportContainer = styled.div`
   top: 20px;
   right: 20px;
   z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const ExportButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  background: ${props => props.variant === 'secondary' ? '#333' : '#4ECDC4'};
-  color: white;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 120px;
-  justify-content: center;
-
-  &:hover {
-    background: ${props => props.variant === 'secondary' ? '#444' : '#45B7B8'};
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
 `;
 
 const DropdownMenu = styled.div<{ isOpen: boolean }>`
   position: absolute;
-  top: 100%;
+  top: 0;
   right: 0;
   background: #2a2a2a;
   border: 1px solid #444;
@@ -274,18 +240,6 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enab
   return (
     <>
       <ExportContainer>
-        <ExportButton
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          aria-label="Export data"
-          aria-haspopup="menu"
-          aria-expanded={isDropdownOpen}
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
-          </svg>
-          Export Data
-        </ExportButton>
-
         <DropdownMenu isOpen={isDropdownOpen}>
           <DropdownItem onClick={exportAsJSON}>
             <svg viewBox="0 0 24 24" fill="currentColor">
