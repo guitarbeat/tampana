@@ -65,32 +65,38 @@ const HomeIndicatorHandle = styled.div`
 `;
 
 // Accessory button styles
-const AccessoryButton = styled.button<{ $color?: string }>`
+const AccessoryButton = styled.button<{ $color?: string; $isActive?: boolean }>`
   width: ${ACCESSORY_SIZE}px;
   height: ${ACCESSORY_SIZE}px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
+  background: ${props =>
+    props.$isActive
+      ? 'rgba(255, 255, 255, 0.15)'
+      : 'rgba(255, 255, 255, 0.05)'};
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: ${props => props.$color || 'white'};
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
   padding: 0;
   margin: 0 ${ACCESSORY_SPACING / 2}px;
-  
+  box-shadow: ${props =>
+    props.$isActive ? '0 0 0 2px rgba(255, 255, 255, 0.2)' : 'none'};
+  backdrop-filter: blur(4px);
+
   &:hover {
     background: rgba(255, 255, 255, 0.1);
   }
-  
+
   &:active {
     transform: scale(0.9);
   }
-  
+
   svg {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
   }
 `;
 
@@ -316,6 +322,7 @@ const Divider = ({
                   onMouseDown={(e) => e.stopPropagation()}
                   onTouchStart={(e) => e.stopPropagation()}
                   $color={accessory.color}
+                  $isActive={accessory.isActive}
                   aria-label={accessory.tooltip}
                   title={accessory.tooltip}
                 >
@@ -356,6 +363,7 @@ const Divider = ({
                 onMouseDown={(e) => e.stopPropagation()}
                 onTouchStart={(e) => e.stopPropagation()}
                 $color={accessory.color}
+                $isActive={accessory.isActive}
                 aria-label={accessory.tooltip}
                 title={accessory.tooltip}
               >
@@ -378,6 +386,7 @@ const Divider = ({
                 onMouseDown={(e) => e.stopPropagation()}
                 onTouchStart={(e) => e.stopPropagation()}
                 $color={menuColor}
+                $isActive={isMenuOpen}
               >
                 {menuIcon || (
                   <svg viewBox="0 0 24 24" fill="currentColor">

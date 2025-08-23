@@ -3,12 +3,16 @@
   width: 100%;
   box-sizing: border-box;
 
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   color: #fff;
   font-size: 14px;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 
   --vuecal-border-color: rgba(255, 255, 255, 0.08) !important;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -22,6 +26,25 @@
   --vuecal-cell-text-color: #fff;
   --vuecal-header-color: transparent;
   --vuecal-header-text-color: #fff;
+}
+
+.vuecal::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.vuecal::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.vuecal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.vuecal::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
 }
 
 /* Modern dark theme with glass morphism */
