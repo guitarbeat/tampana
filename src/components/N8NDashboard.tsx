@@ -84,11 +84,8 @@ const QuickActions = styled.div`
 `;
 
 const ActionCard = styled.div`
-  background: #2a2a2a;
-  border-radius: 8px;
   padding: 20px;
   text-align: center;
-  border: 1px solid #444;
   transition: all 0.2s ease;
   cursor: pointer;
   
@@ -124,11 +121,8 @@ const SectionDivider = styled.div`
 `;
 
 const InfoPanel = styled.div`
-  background: #1a1a1a;
-  border-radius: 12px;
   padding: 24px;
   margin: 20px 0;
-  border: 1px solid #333;
 `;
 
 const InfoTitle = styled.h3`
@@ -145,10 +139,7 @@ const InfoGrid = styled.div`
 `;
 
 const InfoCard = styled.div`
-  background: #2a2a2a;
   padding: 16px;
-  border-radius: 8px;
-  border: 1px solid #444;
 `;
 
 const InfoLabel = styled.div`
@@ -257,39 +248,39 @@ const N8NDashboard: React.FC = () => {
       </StatusBanner>
 
       <QuickActions>
-        <ActionCard onClick={() => handleQuickAction('test')}>
+        <ActionCard className="glass-card" onClick={() => handleQuickAction('test')}>
           <ActionIcon>🔌</ActionIcon>
           <ActionTitle>Test Connection</ActionTitle>
           <ActionDescription>Verify N8N connectivity</ActionDescription>
         </ActionCard>
         
-        <ActionCard onClick={() => handleQuickAction('sync')}>
+        <ActionCard className="glass-card" onClick={() => handleQuickAction('sync')}>
           <ActionIcon>🔄</ActionIcon>
           <ActionTitle>Sync Data</ActionTitle>
           <ActionDescription>Send current data to N8N</ActionDescription>
         </ActionCard>
         
-        <ActionCard onClick={() => handleQuickAction('patterns')}>
+        <ActionCard className="glass-card" onClick={() => handleQuickAction('patterns')}>
           <ActionIcon>🔍</ActionIcon>
           <ActionTitle>Detect Patterns</ActionTitle>
           <ActionDescription>Analyze emotional trends</ActionDescription>
         </ActionCard>
         
-        <ActionCard onClick={() => handleQuickAction('export')}>
+        <ActionCard className="glass-card" onClick={() => handleQuickAction('export')}>
           <ActionIcon>📊</ActionIcon>
           <ActionTitle>Export Data</ActionTitle>
           <ActionDescription>Send data in various formats</ActionDescription>
         </ActionCard>
       </QuickActions>
 
-      <InfoPanel>
+      <InfoPanel className="glass-card">
         <InfoTitle>Integration Overview</InfoTitle>
         <InfoGrid>
-          <InfoCard>
+          <InfoCard className="glass-card">
             <InfoLabel>Total Events</InfoLabel>
             <InfoValue>{mockEvents.length}</InfoValue>
           </InfoCard>
-          <InfoCard>
+          <InfoCard className="glass-card">
             <InfoLabel>Last Sync</InfoLabel>
             <InfoValue>
               {n8nService.getSyncStatus().lastSync ? 
@@ -298,11 +289,11 @@ const N8NDashboard: React.FC = () => {
               }
             </InfoValue>
           </InfoCard>
-          <InfoCard>
+          <InfoCard className="glass-card">
             <InfoLabel>Webhooks Sent</InfoLabel>
             <InfoValue>{n8nService.getSyncStatus().webhooksSent}</InfoValue>
           </InfoCard>
-          <InfoCard>
+          <InfoCard className="glass-card">
             <InfoLabel>Connection Status</InfoLabel>
             <InfoValue style={{ 
               color: connectionStatus === 'connected' ? '#28a745' : 

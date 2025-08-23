@@ -4,11 +4,8 @@ import n8nService from '../services/n8nService';
 import { EmotionalData, EmotionalEvent } from '../types/n8n';
 
 const Container = styled.div`
-  background: #1a1a1a;
-  border-radius: 12px;
   padding: 24px;
   margin: 20px 0;
-  border: 1px solid #333;
 `;
 
 const Title = styled.h3`
@@ -337,7 +334,7 @@ const N8NDataExport: React.FC<N8NDataExportProps> = ({ events }) => {
   };
 
   return (
-    <Container>
+    <Container className="glass-card">
       <Title>N8N Data Export & Integration</Title>
       
       {alert && (
