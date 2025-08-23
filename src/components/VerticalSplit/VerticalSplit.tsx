@@ -487,6 +487,12 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   const [containerHeight, setContainerHeight] = useState<number>(0);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
+  const [isDragging, setIsDragging] = useState(false);
+  const mouseMoveRef = useRef<(e: MouseEvent) => void>();
+  const mouseUpRef = useRef<() => void>();
+  const touchMoveRef = useRef<(e: TouchEvent) => void>();
+  const touchEndRef = useRef<() => void>();
+
   // Derive content from explicit props or children
   const childrenArray = React.Children.toArray(children);
   const effectiveTop = topView ?? childrenArray[0] ?? null;
@@ -544,6 +550,23 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
     };
   }, [isInitialized]);
 
+  useEffect(() => {
+    return () => {
+      if (mouseMoveRef.current) {
+        document.removeEventListener('mousemove', mouseMoveRef.current);
+      }
+      if (mouseUpRef.current) {
+        document.removeEventListener('mouseup', mouseUpRef.current);
+      }
+      if (touchMoveRef.current) {
+        document.removeEventListener('touchmove', touchMoveRef.current as any);
+      }
+      if (touchEndRef.current) {
+        document.removeEventListener('touchend', touchEndRef.current as any);
+      }
+    };
+  }, [isDragging]);
+
   const snapToEdge = () => {
     if (!containerRef.current) return;
     const height = containerRef.current.getBoundingClientRect().height;
@@ -565,7 +588,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
     
     const startY = e.clientY;
     const startSplitY = splitY;
-    
+
     const onMouseMove = (moveEvent: MouseEvent) => {
       moveEvent.preventDefault();
       if (!containerRef.current) return;
@@ -605,7 +628,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       
       setSplitY(newSplitY);
     };
-    
+
     const onMouseUp = () => {
       // Reset cursor styles
       document.body.style.cursor = '';
@@ -614,10 +637,17 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
 
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+      setIsDragging(false);
+      mouseMoveRef.current = undefined;
+      mouseUpRef.current = undefined;
     };
-    
+
+    mouseMoveRef.current = onMouseMove;
+    mouseUpRef.current = onMouseUp;
+
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+    setIsDragging(true);
   };
 
   // Touch event handlers
@@ -627,7 +657,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
     
     const startY = e.touches[0].clientY;
     const startSplitY = splitY;
-    
+
     const onTouchMove = (moveEvent: TouchEvent) => {
       moveEvent.preventDefault();
       if (!containerRef.current || !moveEvent.touches[0]) return;
@@ -667,15 +697,22 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       
       setSplitY(newSplitY);
     };
-    
+
     const onTouchEnd = () => {
       snapToEdge();
       document.removeEventListener('touchmove', onTouchMove as any);
       document.removeEventListener('touchend', onTouchEnd as any);
+      setIsDragging(false);
+      touchMoveRef.current = undefined;
+      touchEndRef.current = undefined;
     };
-    
+
+    touchMoveRef.current = onTouchMove;
+    touchEndRef.current = onTouchEnd;
+
     document.addEventListener('touchmove', onTouchMove as any, { passive: false });
     document.addEventListener('touchend', onTouchEnd as any);
+    setIsDragging(true);
   };
 
   // Calculate panel heights and scales
