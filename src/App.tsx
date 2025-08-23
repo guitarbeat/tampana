@@ -1,6 +1,21 @@
 import { useState, useRef, lazy, useEffect } from 'react';
 import styled from 'styled-components';
 import VerticalSplit from './components/VerticalSplit/VerticalSplit';
+import {
+  CalendarDaysIcon,
+  ChartBarIcon,
+  CalendarIcon,
+  HomeIcon,
+  SunIcon,
+  MoonIcon,
+  ArrowUpTrayIcon,
+  ClockIcon,
+  Cog6ToothIcon,
+  PlusIcon,
+  PencilSquareIcon,
+  TrashIcon,
+  DocumentTextIcon,
+} from './icons';
 const EmotionalCalendar = lazy(() => import('./components/EmotionalCalendar'));
 const EmojiGridMapper = lazy(() => import('./components/EmojiGridMapper/EmojiGridMapper'));
 const DataExport = lazy(() => import('./components/DataExport'));
@@ -219,28 +234,28 @@ function ThemedApp() {
 
   const leadingAccessories = [
     {
-      icon: '📅',
+      icon: <CalendarDaysIcon />,
       tooltip: 'Day View (1)',
       onClick: () => handleViewChange('day'),
       isActive: currentView === 'day',
       color: currentView === 'day' ? '#4CAF50' : '#666'
     },
     {
-      icon: '📊',
+      icon: <ChartBarIcon />,
       tooltip: 'Week View (2)',
       onClick: () => handleViewChange('week'),
       isActive: currentView === 'week',
       color: currentView === 'week' ? '#2196F3' : '#666'
     },
     {
-      icon: '📆',
+      icon: <CalendarIcon />,
       tooltip: 'Month View (3)',
       onClick: () => handleViewChange('month'),
       isActive: currentView === 'month',
       color: currentView === 'month' ? '#9C27B0' : '#666'
     },
     {
-      icon: '🏠',
+      icon: <HomeIcon />,
       tooltip: 'Today (T)',
       onClick: handleTodayClick,
       isActive: false,
@@ -250,35 +265,35 @@ function ThemedApp() {
 
   const trailingAccessories = [
     {
-      icon: themeName === 'dark' ? '☀️' : '🌙',
+      icon: themeName === 'dark' ? <SunIcon /> : <MoonIcon />,
       tooltip: themeName === 'dark' ? 'Switch to Day Mode' : 'Switch to Night Mode',
       onClick: toggleTheme,
       isActive: false,
       color: themeName === 'dark' ? '#FFD700' : '#4169E1'
     },
     {
-      icon: '📤',
+      icon: <ArrowUpTrayIcon />,
       tooltip: 'Export Data (E)',
       onClick: handleExportData,
       isActive: false,
       color: '#FF9800'
     },
     {
-      icon: showWeekends ? '📅' : '🗓️',
+      icon: showWeekends ? <CalendarDaysIcon /> : <CalendarIcon />,
       tooltip: showWeekends ? 'Hide Weekends (W)' : 'Show Weekends (W)',
       onClick: toggleWeekends,
       isActive: showWeekends,
       color: showWeekends ? '#4CAF50' : '#666'
     },
     {
-      icon: timeFormat24h ? '🕐' : '🕛',
+      icon: <ClockIcon />,
       tooltip: timeFormat24h ? '12h Format (F)' : '24h Format (F)',
       onClick: toggleTimeFormat,
       isActive: timeFormat24h,
       color: timeFormat24h ? '#2196F3' : '#666'
     },
     {
-      icon: '⚙️',
+      icon: <Cog6ToothIcon />,
       tooltip: 'Settings (S)',
       onClick: handleSettingsClick,
       isActive: showSettings,
@@ -287,11 +302,11 @@ function ThemedApp() {
   ];
 
   const menuItems = [
-    { label: 'Add New Event', icon: '➕', onClick: handleAddEvent },
-    { label: 'Edit Mode', icon: '✏️', onClick: handleEditMode },
-    { label: 'Clear All Events', icon: '🗑️', onClick: handleClearEvents },
-    { label: 'Export as JSON', icon: '📄', onClick: handleExportJSON },
-    { label: 'Export as CSV', icon: '📊', onClick: handleExportCSV }
+    { label: 'Add New Event', icon: <PlusIcon />, onClick: handleAddEvent },
+    { label: 'Edit Mode', icon: <PencilSquareIcon />, onClick: handleEditMode },
+    { label: 'Clear All Events', icon: <TrashIcon />, onClick: handleClearEvents },
+    { label: 'Export as JSON', icon: <DocumentTextIcon />, onClick: handleExportJSON },
+    { label: 'Export as CSV', icon: <ChartBarIcon />, onClick: handleExportCSV }
   ];
 
   return (
