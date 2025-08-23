@@ -281,6 +281,7 @@ const Divider = ({
   menuAccessories,
   menuIcon,
   menuColor,
+  backgroundColor,
 }: {
   top: number;
   onMouseDown: (e: React.MouseEvent) => void;
@@ -290,6 +291,7 @@ const Divider = ({
   menuAccessories?: MenuAccessory[];
   menuIcon?: React.ReactNode;
   menuColor?: string;
+  backgroundColor: string;
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -321,7 +323,7 @@ const Divider = ({
         width: '100%',
         height: DIVIDER_HEIGHT,
         top,
-        background: 'black',
+        background: backgroundColor,
         zIndex: 50,
         display: 'flex',
         alignItems: 'center',
@@ -769,6 +771,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         menuAccessories={effectiveMenu}
         menuIcon={menuIcon}
         menuColor={menuColor}
+        backgroundColor={effectiveBgColor}
       />
       
       {/* Bottom Panel - render even at 0 height */}
