@@ -286,7 +286,7 @@ function ThemedApp() {
     }
   ];
 
-  const menuItems = [
+  const menuAccessories = [
     { label: 'Add New Event', icon: '➕', onClick: handleAddEvent },
     { label: 'Edit Mode', icon: '✏️', onClick: handleEditMode },
     { label: 'Clear All Events', icon: '🗑️', onClick: handleClearEvents },
@@ -300,7 +300,7 @@ function ThemedApp() {
       <VerticalSplit
         leadingAccessories={leadingAccessories}
         trailingAccessories={trailingAccessories}
-        menuItems={menuItems}
+        menuAccessories={menuAccessories}
       >
         <Panel>
           {showSettings ? (
