@@ -10,11 +10,13 @@ const CalendarContainer = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  background: transparent;
   color: #fff;
   position: relative;
   border-radius: 16px;
   overflow: hidden;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 `;
 
 const CalendarWrapper = styled.div`
