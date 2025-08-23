@@ -7,6 +7,8 @@ import { workflowTemplates } from '../data/n8nWorkflowTemplates';
 const Container = styled.div`
   padding: 24px;
   margin: 20px 0;
+  border-radius: 16px;
+  overflow: hidden;
 `;
 
 const Title = styled.h3`
