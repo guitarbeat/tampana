@@ -6,6 +6,8 @@ import { EmotionalData, EmotionalEvent } from '../types/n8n';
 const Container = styled.div`
   padding: 24px;
   margin: 20px 0;
+  border-radius: 16px;
+  overflow: hidden;
 `;
 
 const Title = styled.h3`

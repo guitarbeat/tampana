@@ -6,6 +6,8 @@ import { N8NConfig, N8NResponse, SyncStatus } from '../types/n8n';
 const PanelContainer = styled.div`
   padding: 24px;
   margin: 20px 0;
+  border-radius: 16px;
+  overflow: hidden;
 `;
 
 const Title = styled.h3`
