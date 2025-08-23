@@ -307,11 +307,13 @@ const Divider = ({
           <AccessoriesContainer>
             {leadingAccessories.map((accessory, index) => (
               <AccessoryWrapper key={`leading-${index}`}>
-                <AccessoryButton 
+                <AccessoryButton
                   onClick={(e) => {
                     e.stopPropagation();
                     accessory.onClick();
                   }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
                   $color={accessory.color}
                   aria-label={accessory.tooltip}
                   title={accessory.tooltip}
@@ -345,11 +347,13 @@ const Divider = ({
         <AccessoriesContainer>
           {trailingAccessories && trailingAccessories.map((accessory, index) => (
             <AccessoryWrapper key={`trailing-${index}`}>
-              <AccessoryButton 
+              <AccessoryButton
                 onClick={(e) => {
                   e.stopPropagation();
                   accessory.onClick();
                 }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
                 $color={accessory.color}
                 aria-label={accessory.tooltip}
                 title={accessory.tooltip}
@@ -365,8 +369,13 @@ const Divider = ({
           {/* Menu button if menu accessories exist */}
           {menuAccessories && menuAccessories.length > 0 && (
             <div ref={menuRef}>
-              <MenuButton 
-                onClick={toggleMenu}
+              <MenuButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleMenu(e);
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
                 $color={menuColor}
               >
                 {menuIcon || (
