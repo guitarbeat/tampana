@@ -64,7 +64,7 @@ const Panel = styled.div`
 function ThemedApp() {
   const { theme, themeName, toggleTheme } = useTheme();
   const [events, setEvents] = useState<EventData[]>([]);
-  const [emotionLogs, setEmotionLogs] = useState<EmotionLog[]>([]);
+  const [, setEmotionLogs] = useState<EmotionLog[]>([]);
   const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('tampanaCurrentView');
