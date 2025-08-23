@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import { VFX } from '@vfx-js/core';
+import { EmotionLog } from '../../types/emotion-log';
 
 // Register GSAP plugin
 gsap.registerPlugin(Draggable);
@@ -16,7 +17,7 @@ const EMOJIS = {
 };
 
 interface EmojiGridMapperProps {
-  onEmojiSelect?: (data: any) => void;
+  onEmojiSelect?: (data: EmotionLog) => void;
   onGridChange?: (grid: any) => void;
 }
 
@@ -181,11 +182,14 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
 
         // Callback with current emoji
         const currentEmoji = getEmoji(unitX, unitY);
+        const emotion = getEmotionLabel(unitX, unitY);
         onEmojiSelect?.({
           emoji: currentEmoji,
+          emotion,
           position: { x: unitX, y: unitY },
           valence: unitX,
-          arousal: unitY
+          arousal: unitY,
+          timestamp: new Date().toISOString()
         });
       },
       onDragEnd: function() {
