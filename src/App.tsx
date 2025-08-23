@@ -7,7 +7,6 @@ const DataExport = lazy(() => import('./components/DataExport'));
 const SettingsPage = lazy(() => import('./components/SettingsPage'));
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { EventData } from './types/event-data';
-import { EmotionLog } from './types/emotion-log';
 import './index.css';
 import './styles/emotional-calendar.css';
 
@@ -64,7 +63,6 @@ const Panel = styled.div`
 function ThemedApp() {
   const { theme, themeName, toggleTheme } = useTheme();
   const [events, setEvents] = useState<EventData[]>([]);
-  const [, setEmotionLogs] = useState<EmotionLog[]>([]);
   const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('tampanaCurrentView');
@@ -121,10 +119,6 @@ function ThemedApp() {
   
   const calendarRef = useRef<EmotionalCalendarHandle | null>(null);
   const dataExportRef = useRef<DataExportHandle | null>(null);
-
-  const handleEmojiSelect = (log: EmotionLog) => {
-    setEmotionLogs(prev => [...prev, log]);
-  };
 
   useEffect(() => { localStorage.setItem('tampanaCurrentView', currentView); }, [currentView]);
   useEffect(() => { localStorage.setItem('tampanaShowWeekends', String(showWeekends)); }, [showWeekends]);
@@ -328,7 +322,7 @@ function ThemedApp() {
           )}
         </Panel>
         <Panel>
-          <EmojiGridMapper onEmojiSelect={handleEmojiSelect} />
+          <EmojiGridMapper />
         </Panel>
       </VerticalSplit>
       <DataExport ref={dataExportRef} events={events} enableToasts={notificationsEnabled} />
