@@ -138,6 +138,11 @@ const Tooltip = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.08);
 `;
 
+const MenuWrapper = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
 const MenuButton = styled(AccessoryButton)`
   position: relative;
 `;
@@ -396,7 +401,7 @@ const Divider = ({
           
           {/* Menu button if menu accessories exist */}
           {menuAccessories && menuAccessories.length > 0 && (
-            <div ref={menuRef}>
+            <MenuWrapper ref={menuRef}>
               <MenuButton
                 onClick={(e) => {
                   e.stopPropagation();
@@ -406,32 +411,39 @@ const Divider = ({
                 onTouchStart={(e) => e.stopPropagation()}
                 $color={menuColor}
                 $isActive={isMenuOpen}
+                aria-haspopup="true"
+                aria-expanded={isMenuOpen}
               >
                 {menuIcon || (
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
                   </svg>
                 )}
-                
-                {/* Menu dropdown */}
-                <MenuContainer $isOpen={isMenuOpen}>
-                  {menuAccessories.map((item, index) => (
-                    <MenuItem 
-                      key={`menu-${index}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        item.onClick();
-                        setIsMenuOpen(false);
-                      }}
-                      $color={item.color}
-                    >
-                      {item.icon}
-                      {item.label}
-                    </MenuItem>
-                  ))}
-                </MenuContainer>
               </MenuButton>
-            </div>
+
+              {/* Menu dropdown */}
+              <MenuContainer
+                $isOpen={isMenuOpen}
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+              >
+                {menuAccessories.map((item, index) => (
+                  <MenuItem
+                    key={`menu-${index}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      item.onClick();
+                      setIsMenuOpen(false);
+                    }}
+                    $color={item.color}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </MenuContainer>
+            </MenuWrapper>
           )}
         </AccessoriesContainer>
       </div>
