@@ -44,6 +44,7 @@ const Container = styled.div<{ $backgroundColor: string }>`
   height: 100%;
   display: flex;
   flex-direction: column;
+  border-radius: 32px;
 `;
 
 const HomeIndicatorHandle = styled.div`
@@ -315,9 +316,10 @@ const Divider = ({
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'grab',
+        transition: 'top 0.25s ease',
       }}
     >
-      <div style={{ 
+      <div style={{
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'space-between',
