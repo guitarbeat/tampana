@@ -9,6 +9,7 @@ import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { EventData } from './types/event-data';
 import './index.css';
 import './styles/emotional-calendar.css';
+import './styles/glass.css';
 
 // Types for refs exposed by children
 export interface EmotionalCalendarHandle {
