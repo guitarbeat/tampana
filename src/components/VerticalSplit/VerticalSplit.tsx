@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { scaleDownButtonStyle, vibrate, getPanelScale } from './utils';
+import { useTheme } from '../../contexts/ThemeContext';
 
 // Constants
 const DIVIDER_HEIGHT = 20;
@@ -28,14 +29,14 @@ interface MenuAccessory {
 }
 
 // Styled components
-const Container = styled.div`
+const Container = styled.div<{ $backgroundColor: string }>`
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   overflow: hidden;
-  background-color: #000;
+  background-color: ${props => props.$backgroundColor};
   user-select: none;
   touch-action: none;
   width: 100%;
@@ -435,7 +436,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   bottomView,
   topViewOverlay,
   bottomViewOverlay,
-  bgColor = "#ffffff",
+  bgColor,
   leadingAccessories,
   trailingAccessories,
   menuAccessories,
@@ -444,6 +445,8 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   menuColor,
   children,
 }) => {
+  const { theme } = useTheme();
+  const effectiveBgColor = bgColor || theme.background;
   // State variables
   const containerRef = useRef<HTMLDivElement>(null);
   const [splitY, setSplitY] = useState<number>(0);
@@ -644,15 +647,15 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
 
   // Don't render panels until we have proper dimensions and initialization
   if (!isInitialized || containerHeight === 0) {
-    return <Container ref={containerRef} style={{ backgroundColor: '#000' }} />;
+    return <Container ref={containerRef} $backgroundColor={effectiveBgColor} />;
   }
 
   return (
-    <Container ref={containerRef} style={{ backgroundColor: '#000' }}>
+    <Container ref={containerRef} $backgroundColor={effectiveBgColor}>
       {/* Top Panel - render even at 0 height */}
-      <TopPanel 
-        $height={topHeight} 
-        $backgroundColor={bgColor}
+      <TopPanel
+        $height={topHeight}
+        $backgroundColor={effectiveBgColor}
         $scale={topScale}
       >
         <ContentContainer>
@@ -674,9 +677,9 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       />
       
       {/* Bottom Panel - render even at 0 height */}
-      <BottomPanel 
-        $height={bottomHeight} 
-        $backgroundColor={bgColor}
+      <BottomPanel
+        $height={bottomHeight}
+        $backgroundColor={effectiveBgColor}
         $top={bottomTop}
         $scale={bottomScale}
       >
