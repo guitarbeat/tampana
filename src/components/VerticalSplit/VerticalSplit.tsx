@@ -11,6 +11,7 @@ const EDGE_RESISTANCE_THRESHOLD = 50; // pixels from edge
 const EDGE_RESISTANCE_FACTOR = 0.75; // movement multiplier
 const HAPTIC_THRESHOLD = 10; // pixels of overscroll to trigger haptic
 const MINIMIZE_SCALE_THRESHOLD = 100; // pixels from edge to start scaling
+const SNAP_THRESHOLD = 60; // pixels from edge to auto-close
 
 // Types for accessories
 interface SplitAccessory {
@@ -170,6 +171,21 @@ const MenuItem = styled.button<{ $color?: string }>`
   }
 `;
 
+const RestoreButton = styled.button<{ $position: 'top' | 'bottom' }>`
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  ${props => props.$position === 'top' ? 'top: 8px;' : 'bottom: 8px;'}
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 4px 8px;
+  cursor: pointer;
+  z-index: 200;
+  ${scaleDownButtonStyle}
+`;
+
 // Panel styled components
 const Panel = styled.div<{ $height: number; $backgroundColor: string; $scale?: number }>`
   position: absolute;
@@ -183,7 +199,7 @@ const Panel = styled.div<{ $height: number; $backgroundColor: string; $scale?: n
   box-sizing: border-box;
   transform: scale(${props => props.$scale || 1});
   transform-origin: ${props => props.$scale && props.$scale < 1 ? 'center top' : 'center center'};
-  transition: transform 0.2s ease-out;
+  transition: height 0.25s ease, transform 0.2s ease-out;
 `;
 
 const TopPanel = styled(Panel)`
@@ -192,6 +208,7 @@ const TopPanel = styled(Panel)`
 
 const BottomPanel = styled(Panel)<{ $top: number; $scale?: number }>`
   top: ${props => props.$top}px;
+  transition: top 0.25s ease, height 0.25s ease, transform 0.2s ease-out;
 `;
 
 const ContentContainer = styled.div`
@@ -510,6 +527,16 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
     };
   }, [isInitialized]);
 
+  const snapToEdge = () => {
+    if (!containerRef.current) return;
+    const height = containerRef.current.getBoundingClientRect().height;
+    if (splitY < SNAP_THRESHOLD) {
+      setSplitY(DIVIDER_HEIGHT / 2);
+    } else if (splitY > height - SNAP_THRESHOLD) {
+      setSplitY(height - DIVIDER_HEIGHT / 2);
+    }
+  };
+
   // Mouse event handlers
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -566,7 +593,8 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       // Reset cursor styles
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
-      
+      snapToEdge();
+
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
     };
@@ -624,6 +652,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
     };
     
     const onTouchEnd = () => {
+      snapToEdge();
       document.removeEventListener('touchmove', onTouchMove as any);
       document.removeEventListener('touchend', onTouchEnd as any);
     };
@@ -687,6 +716,16 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
           {bottomViewOverlay ? bottomViewOverlay : effectiveBottom}
         </ContentContainer>
       </BottomPanel>
+      {topHeight === 0 && (
+        <RestoreButton $position="top" onClick={() => setSplitY(containerHeight / 2)}>
+          ⬇️
+        </RestoreButton>
+      )}
+      {bottomHeight === 0 && (
+        <RestoreButton $position="bottom" onClick={() => setSplitY(containerHeight / 2)}>
+          ⬆️
+        </RestoreButton>
+      )}
     </Container>
   );
 };
