@@ -31,6 +31,7 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
   const circleRef = useRef<HTMLDivElement>(null);
   const backgroundRef = useRef<HTMLDivElement>(null);
   const vfxRef = useRef<VFX | null>(null);
+  const lastEmitRef = useRef(0);
 
   // Get emoji based on position
   const getEmoji = useCallback((x: number, y: number) => {
@@ -180,17 +181,21 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
           });
         }
 
-        // Callback with current emoji
-        const currentEmoji = getEmoji(unitX, unitY);
-        const emotion = getEmotionLabel(unitX, unitY);
-        onEmojiSelect?.({
-          emoji: currentEmoji,
-          emotion,
-          position: { x: unitX, y: unitY },
-          valence: unitX,
-          arousal: unitY,
-          timestamp: new Date().toISOString()
-        });
+        // Throttle callback with current emoji
+        const now = Date.now();
+        if (now - lastEmitRef.current > 100) {
+          lastEmitRef.current = now;
+          const currentEmoji = getEmoji(unitX, unitY);
+          const emotion = getEmotionLabel(unitX, unitY);
+          onEmojiSelect?.({
+            emoji: currentEmoji,
+            emotion,
+            position: { x: unitX, y: unitY },
+            valence: unitX,
+            arousal: unitY,
+            timestamp: new Date().toISOString()
+          });
+        }
       },
       onDragEnd: function() {
         setIsDragging(false);
@@ -200,6 +205,20 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
           vfxRef.current.remove(backgroundRef.current);
         }
         
+        // Emit final position before snapping back
+        const endUnitX = this.x / radius;
+        const endUnitY = -this.y / radius;
+        const endEmoji = getEmoji(endUnitX, endUnitY);
+        const endEmotion = getEmotionLabel(endUnitX, endUnitY);
+        onEmojiSelect?.({
+          emoji: endEmoji,
+          emotion: endEmotion,
+          position: { x: endUnitX, y: endUnitY },
+          valence: endUnitX,
+          arousal: endUnitY,
+          timestamp: new Date().toISOString()
+        });
+
         // Snap back to center with enhanced animation
         gsap.to(this.target, {
           x: 0,
