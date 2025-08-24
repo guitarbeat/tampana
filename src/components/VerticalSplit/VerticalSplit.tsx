@@ -4,6 +4,7 @@ import { scaleDownButtonStyle, vibrate, getPanelScale } from './utils';
 import { useTheme } from '../../contexts/ThemeContext';
 
 // Constants
+const BORDER_RADIUS = 32;
 const DIVIDER_HEIGHT = 20;
 const ACCESSORY_SIZE = 24;
 const ACCESSORY_SPACING = 8;
@@ -44,7 +45,7 @@ const Container = styled.div<{ $backgroundColor: string }>`
   height: 100%;
   display: flex;
   flex-direction: column;
-  border-radius: 32px;
+  border-radius: ${BORDER_RADIUS}px;
 `;
 
 const HomeIndicatorHandle = styled.div`
@@ -234,10 +235,12 @@ const ContentContainer = styled.div<{ $position: 'top' | 'bottom' }>`
   overflow: auto;
   position: relative;
   box-sizing: border-box;
+
   border-top-left-radius: ${props => props.$position === 'top' ? '32px' : '0'};
   border-top-right-radius: ${props => props.$position === 'top' ? '32px' : '0'};
   border-bottom-left-radius: ${props => props.$position === 'bottom' ? '32px' : '0'};
   border-bottom-right-radius: ${props => props.$position === 'bottom' ? '32px' : '0'};
+
   padding: 16px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
