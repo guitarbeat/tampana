@@ -31,6 +31,11 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
   const circleRef = useRef<HTMLDivElement>(null);
   const backgroundRef = useRef<HTMLDivElement>(null);
   const vfxRef = useRef<VFX | null>(null);
+  const selectRef = useRef<EmojiGridMapperProps['onEmojiSelect']>(onEmojiSelect);
+
+  useEffect(() => {
+    selectRef.current = onEmojiSelect;
+  }, [onEmojiSelect]);
 
   // Get emoji based on position
   const getEmoji = useCallback((x: number, y: number) => {
@@ -183,7 +188,7 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
         // Callback with current emoji
         const currentEmoji = getEmoji(unitX, unitY);
         const emotion = getEmotionLabel(unitX, unitY);
-        onEmojiSelect?.({
+        selectRef.current?.({
           emoji: currentEmoji,
           emotion,
           position: { x: unitX, y: unitY },
@@ -241,7 +246,7 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
         dragInstance.kill();
       }
     };
-  }, [containerSize, getEmoji, onEmojiSelect]);
+  }, [containerSize, getEmoji]);
 
   const currentEmoji = getEmoji(position.x, position.y);
   const distance = Math.sqrt(position.x * position.x + position.y * position.y);
