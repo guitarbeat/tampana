@@ -31,6 +31,7 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
   const circleRef = useRef<HTMLDivElement>(null);
   const backgroundRef = useRef<HTMLDivElement>(null);
   const vfxRef = useRef<VFX | null>(null);
+  const lastPositionRef = useRef({ x: 0, y: 0 });
 
   // Get emoji based on position
   const getEmoji = useCallback((x: number, y: number) => {
@@ -165,6 +166,7 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
         const unitX = this.x / radius;
         const unitY = -this.y / radius; // Flip Y for screen coordinates
         setPosition({ x: unitX, y: unitY });
+        lastPositionRef.current = { x: unitX, y: unitY };
 
         // Update background VFX effects based on position
         const intensity = Math.sqrt(unitX * unitX + unitY * unitY);
@@ -180,7 +182,11 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
           });
         }
 
-        // Callback with current emoji
+      },
+      onDragEnd: function() {
+        setIsDragging(false);
+
+        const { x: unitX, y: unitY } = lastPositionRef.current;
         const currentEmoji = getEmoji(unitX, unitY);
         const emotion = getEmotionLabel(unitX, unitY);
         onEmojiSelect?.({
@@ -191,15 +197,12 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
           arousal: unitY,
           timestamp: new Date().toISOString()
         });
-      },
-      onDragEnd: function() {
-        setIsDragging(false);
-        
+
         // Remove VFX effects when drag ends
         if (vfxRef.current && backgroundRef.current) {
           vfxRef.current.remove(backgroundRef.current);
         }
-        
+
         // Snap back to center with enhanced animation
         gsap.to(this.target, {
           x: 0,

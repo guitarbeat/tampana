@@ -1,4 +1,4 @@
-import { useState, useRef, lazy, useEffect } from 'react';
+import { useState, useRef, lazy, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import VerticalSplit from './components/VerticalSplit/VerticalSplit';
 import {
@@ -22,6 +22,7 @@ const DataExport = lazy(() => import('./components/DataExport'));
 const SettingsPage = lazy(() => import('./components/SettingsPage'));
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { EventData } from './types/event-data';
+import { EmotionLog } from './types/emotion-log';
 import './index.css';
 import './styles/emotional-calendar.css';
 
@@ -226,6 +227,10 @@ function ThemedApp() {
     dataExportRef.current?.handleExportCSV();
   };
 
+  const handleEmojiSelect = useCallback((data: EmotionLog) => {
+    console.log('Emoji selected', data);
+  }, []);
+
   const leadingAccessories = [
     {
       icon: <CalendarDaysIcon />,
@@ -337,7 +342,7 @@ function ThemedApp() {
           )}
         </Panel>
         <Panel>
-          <EmojiGridMapper />
+          <EmojiGridMapper onEmojiSelect={handleEmojiSelect} />
         </Panel>
       </VerticalSplit>
       <DataExport ref={dataExportRef} events={events} enableToasts={notificationsEnabled} />
