@@ -139,6 +139,11 @@ const Tooltip = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.08);
 `;
 
+const MenuWrapper = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
 const MenuButton = styled(AccessoryButton)`
   position: relative;
 `;
@@ -211,14 +216,18 @@ const Panel = styled.div<{ $height: number; $backgroundColor: string; $scale?: n
 
 const TopPanel = styled(Panel)`
   top: 0;
+  border-top-left-radius: 32px;
+  border-top-right-radius: 32px;
 `;
 
 const BottomPanel = styled(Panel)<{ $top: number; $scale?: number }>`
   top: ${props => props.$top}px;
+  border-bottom-left-radius: 32px;
+  border-bottom-right-radius: 32px;
   transition: top 0.25s ease, height 0.25s ease, transform 0.2s ease-out;
 `;
 
-const ContentContainer = styled.div`
+const ContentContainer = styled.div<{ $position: 'top' | 'bottom' }>`
   height: 100%;
   width: 100%;
   display: flex;
@@ -226,6 +235,12 @@ const ContentContainer = styled.div`
   overflow: auto;
   position: relative;
   box-sizing: border-box;
+
+  border-top-left-radius: ${props => props.$position === 'top' ? '32px' : '0'};
+  border-top-right-radius: ${props => props.$position === 'top' ? '32px' : '0'};
+  border-bottom-left-radius: ${props => props.$position === 'bottom' ? '32px' : '0'};
+  border-bottom-right-radius: ${props => props.$position === 'bottom' ? '32px' : '0'};
+
   padding: 16px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
@@ -269,6 +284,7 @@ const Divider = ({
   menuAccessories,
   menuIcon,
   menuColor,
+  backgroundColor,
 }: {
   top: number;
   onMouseDown: (e: React.MouseEvent) => void;
@@ -278,6 +294,7 @@ const Divider = ({
   menuAccessories?: MenuAccessory[];
   menuIcon?: React.ReactNode;
   menuColor?: string;
+  backgroundColor: string;
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -298,7 +315,7 @@ const Divider = ({
   
   const toggleMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsMenuOpen(!isMenuOpen);
+    setIsMenuOpen(prev => !prev);
   };
   
   return (
@@ -309,7 +326,7 @@ const Divider = ({
         width: '100%',
         height: DIVIDER_HEIGHT,
         top,
-        background: 'black',
+        background: backgroundColor,
         zIndex: 50,
         display: 'flex',
         alignItems: 'center',
@@ -395,7 +412,7 @@ const Divider = ({
           
           {/* Menu button if menu accessories exist */}
           {menuAccessories && menuAccessories.length > 0 && (
-            <div ref={menuRef}>
+            <MenuWrapper ref={menuRef}>
               <MenuButton
                 onClick={(e) => {
                   e.stopPropagation();
@@ -405,32 +422,39 @@ const Divider = ({
                 onTouchStart={(e) => e.stopPropagation()}
                 $color={menuColor}
                 $isActive={isMenuOpen}
+                aria-haspopup="true"
+                aria-expanded={isMenuOpen}
               >
                 {menuIcon || (
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
                   </svg>
                 )}
-                
-                {/* Menu dropdown */}
-                <MenuContainer $isOpen={isMenuOpen}>
-                  {menuAccessories.map((item, index) => (
-                    <MenuItem 
-                      key={`menu-${index}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        item.onClick();
-                        setIsMenuOpen(false);
-                      }}
-                      $color={item.color}
-                    >
-                      {item.icon}
-                      {item.label}
-                    </MenuItem>
-                  ))}
-                </MenuContainer>
               </MenuButton>
-            </div>
+
+              {/* Menu dropdown */}
+              <MenuContainer
+                $isOpen={isMenuOpen}
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+              >
+                {menuAccessories.map((item, index) => (
+                  <MenuItem
+                    key={`menu-${index}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      item.onClick();
+                      setIsMenuOpen(false);
+                    }}
+                    $color={item.color}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </MenuContainer>
+            </MenuWrapper>
           )}
         </AccessoriesContainer>
       </div>
@@ -479,6 +503,12 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   const [splitY, setSplitY] = useState<number>(0);
   const [containerHeight, setContainerHeight] = useState<number>(0);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+
+  const [isDragging, setIsDragging] = useState(false);
+  const mouseMoveRef = useRef<(e: MouseEvent) => void>();
+  const mouseUpRef = useRef<() => void>();
+  const touchMoveRef = useRef<(e: TouchEvent) => void>();
+  const touchEndRef = useRef<() => void>();
 
   // Derive content from explicit props or children
   const childrenArray = React.Children.toArray(children);
@@ -537,6 +567,23 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
     };
   }, [isInitialized]);
 
+  useEffect(() => {
+    return () => {
+      if (mouseMoveRef.current) {
+        document.removeEventListener('mousemove', mouseMoveRef.current);
+      }
+      if (mouseUpRef.current) {
+        document.removeEventListener('mouseup', mouseUpRef.current);
+      }
+      if (touchMoveRef.current) {
+        document.removeEventListener('touchmove', touchMoveRef.current as any);
+      }
+      if (touchEndRef.current) {
+        document.removeEventListener('touchend', touchEndRef.current as any);
+      }
+    };
+  }, [isDragging]);
+
   const snapToEdge = () => {
     if (!containerRef.current) return;
     const height = containerRef.current.getBoundingClientRect().height;
@@ -558,7 +605,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
     
     const startY = e.clientY;
     const startSplitY = splitY;
-    
+
     const onMouseMove = (moveEvent: MouseEvent) => {
       moveEvent.preventDefault();
       if (!containerRef.current) return;
@@ -598,7 +645,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       
       setSplitY(newSplitY);
     };
-    
+
     const onMouseUp = () => {
       // Reset cursor styles
       document.body.style.cursor = '';
@@ -607,10 +654,17 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
 
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+      setIsDragging(false);
+      mouseMoveRef.current = undefined;
+      mouseUpRef.current = undefined;
     };
-    
+
+    mouseMoveRef.current = onMouseMove;
+    mouseUpRef.current = onMouseUp;
+
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+    setIsDragging(true);
   };
 
   // Touch event handlers
@@ -620,7 +674,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
     
     const startY = e.touches[0].clientY;
     const startSplitY = splitY;
-    
+
     const onTouchMove = (moveEvent: TouchEvent) => {
       moveEvent.preventDefault();
       if (!containerRef.current || !moveEvent.touches[0]) return;
@@ -660,15 +714,22 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       
       setSplitY(newSplitY);
     };
-    
+
     const onTouchEnd = () => {
       snapToEdge();
       document.removeEventListener('touchmove', onTouchMove as any);
       document.removeEventListener('touchend', onTouchEnd as any);
+      setIsDragging(false);
+      touchMoveRef.current = undefined;
+      touchEndRef.current = undefined;
     };
-    
+
+    touchMoveRef.current = onTouchMove;
+    touchEndRef.current = onTouchEnd;
+
     document.addEventListener('touchmove', onTouchMove as any, { passive: false });
     document.addEventListener('touchend', onTouchEnd as any);
+    setIsDragging(true);
   };
 
   // Calculate panel heights and scales
@@ -697,7 +758,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         $backgroundColor={effectiveBgColor}
         $scale={topScale}
       >
-        <ContentContainer>
+        <ContentContainer $position="top">
           {effectiveTop}
           {topViewOverlay}
         </ContentContainer>
@@ -713,6 +774,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         menuAccessories={effectiveMenu}
         menuIcon={menuIcon}
         menuColor={menuColor}
+        backgroundColor={effectiveBgColor}
       />
       
       {/* Bottom Panel - render even at 0 height */}
@@ -722,7 +784,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         $top={bottomTop}
         $scale={bottomScale}
       >
-        <ContentContainer>
+        <ContentContainer $position="bottom">
           {bottomViewOverlay ? bottomViewOverlay : effectiveBottom}
         </ContentContainer>
       </BottomPanel>
