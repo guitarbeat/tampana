@@ -8,7 +8,8 @@ jest.mock('gsap', () => ({
   __esModule: true,
   default: {
     set: jest.fn(),
-    registerPlugin: jest.fn()
+    registerPlugin: jest.fn(),
+    to: jest.fn()
   }
 }));
 jest.mock('gsap/Draggable', () => ({
@@ -35,6 +36,7 @@ test('onEmojiSelect includes timestamp', () => {
 
   act(() => {
     opts.onDrag.call({ x: 0, y: 0 });
+    opts.onDragEnd.call({});
   });
 
   expect(onEmojiSelect).toHaveBeenCalled();

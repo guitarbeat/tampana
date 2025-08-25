@@ -1,4 +1,4 @@
-import { useState, useRef, lazy, useEffect } from 'react';
+import { useState, useRef, lazy, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import VerticalSplit from './components/VerticalSplit/VerticalSplit';
 import {
@@ -22,6 +22,7 @@ const DataExport = lazy(() => import('./components/DataExport'));
 const SettingsPage = lazy(() => import('./components/SettingsPage'));
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { EventData } from './types/event-data';
+import { EmotionLog } from './types/emotion-log';
 import './index.css';
 import './styles/emotional-calendar.css';
 
@@ -134,6 +135,22 @@ function ThemedApp() {
   
   const calendarRef = useRef<EmotionalCalendarHandle | null>(null);
   const dataExportRef = useRef<DataExportHandle | null>(null);
+  const logBufferRef = useRef<EmotionLog[]>([]);
+  const [, setEmotionLogs] = useState<EmotionLog[]>([]);
+
+  // Periodically flush buffered logs to state to limit re-renders
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (logBufferRef.current.length) {
+        setEmotionLogs(prev => {
+          const next = [...prev, ...logBufferRef.current];
+          logBufferRef.current = [];
+          return next.slice(-100); // keep only last 100 logs
+        });
+      }
+    }, 500);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => { localStorage.setItem('tampanaCurrentView', currentView); }, [currentView]);
   useEffect(() => { localStorage.setItem('tampanaShowWeekends', String(showWeekends)); }, [showWeekends]);
@@ -177,6 +194,10 @@ function ThemedApp() {
 
   const handleEventsUpdate = (updatedEvents: EventData[]) => {
     setEvents(updatedEvents);
+  };
+
+  const handleEmojiSelect = (log: EmotionLog) => {
+    logBufferRef.current.push(log);
   };
 
   const toggleWeekends = () => {
@@ -225,6 +246,10 @@ function ThemedApp() {
   const handleExportCSV = () => {
     dataExportRef.current?.handleExportCSV();
   };
+
+  const handleEmojiSelect = useCallback((data: EmotionLog) => {
+    console.log('Emoji selected', data);
+  }, []);
 
   const leadingAccessories = [
     {
@@ -337,7 +362,7 @@ function ThemedApp() {
           )}
         </Panel>
         <Panel>
-          <EmojiGridMapper />
+          <EmojiGridMapper onEmojiSelect={handleEmojiSelect} />
         </Panel>
       </VerticalSplit>
       <DataExport ref={dataExportRef} events={events} enableToasts={notificationsEnabled} />
