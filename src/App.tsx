@@ -46,7 +46,7 @@ const GlobalStyle = styled.div`
   html, body, #root {
     height: 100%;
     margin: 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   body {
@@ -61,7 +61,7 @@ const GlobalStyle = styled.div`
 const AppContainer = styled.div<{ theme: any }>`
   position: fixed;
   inset: 0;
-  overflow: hidden;
+  overflow: visible;
   background: ${props => props.theme.background};
   width: 100vw;
   height: 100vh;
@@ -73,7 +73,7 @@ const Panel = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 `;
 
 function ThemedApp() {

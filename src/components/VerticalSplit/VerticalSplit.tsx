@@ -37,7 +37,7 @@ const Container = styled.div<{ $backgroundColor: string }>`
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: hidden;
+  overflow: visible;
   background-color: ${props => props.$backgroundColor};
   user-select: none;
   touch-action: none;
@@ -207,7 +207,7 @@ const Panel = styled.div<{ $height: number; $backgroundColor: string; $scale?: n
   width: 100%;
   height: ${props => props.$height}px;
   background: ${props => props.$backgroundColor};
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
   transform: scale(${props => props.$scale || 1});
   transform-origin: ${props => props.$scale && props.$scale < 1 ? 'center top' : 'center center'};
