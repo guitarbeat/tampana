@@ -215,6 +215,9 @@ const N8NDashboard: React.FC = () => {
       case 'patterns':
         n8nService.triggerPatternDetection(mockEvents);
         break;
+      case 'export':
+        // Export is handled by the N8NDataExport component
+        break;
     }
   };
 
@@ -260,6 +263,12 @@ const N8NDashboard: React.FC = () => {
           <ActionIcon>🔍</ActionIcon>
           <ActionTitle>Detect Patterns</ActionTitle>
           <ActionDescription>Analyze emotional trends</ActionDescription>
+        </ActionCard>
+
+        <ActionCard className="glass-card" onClick={() => handleQuickAction('export')}>
+          <ActionIcon>📊</ActionIcon>
+          <ActionTitle>Export Data</ActionTitle>
+          <ActionDescription>Send data in various formats</ActionDescription>
         </ActionCard>
       </QuickActions>
 
