@@ -1,4 +1,4 @@
-import { useState, useRef, lazy, useEffect } from 'react';
+import { useState, useRef, lazy, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import VerticalSplit from './components/VerticalSplit/VerticalSplit';
 import {
@@ -246,6 +246,10 @@ function ThemedApp() {
   const handleExportCSV = () => {
     dataExportRef.current?.handleExportCSV();
   };
+
+  const handleEmojiSelect = useCallback((data: EmotionLog) => {
+    console.log('Emoji selected', data);
+  }, []);
 
   const leadingAccessories = [
     {
