@@ -501,6 +501,10 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   // State variables
   const containerRef = useRef<HTMLDivElement>(null);
   const [splitY, setSplitY] = useState<number>(0);
+  const splitYRef = useRef<number>(0);
+  useEffect(() => {
+    splitYRef.current = splitY;
+  }, [splitY]);
   const [containerHeight, setContainerHeight] = useState<number>(0);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
@@ -527,7 +531,9 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         
         // Only initialize split position once
         if (!isInitialized) {
-          setSplitY(rect.height / 2);
+          const initialSplit = rect.height / 2;
+          setSplitY(initialSplit);
+          splitYRef.current = initialSplit;
           setIsInitialized(true);
         }
       }
@@ -547,7 +553,9 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
           setSplitY(prevSplitY => {
             const minSplit = DIVIDER_HEIGHT / 2;
             const maxSplit = height - DIVIDER_HEIGHT / 2;
-            return Math.max(minSplit, Math.min(maxSplit, prevSplitY));
+            const newSplit = Math.max(minSplit, Math.min(maxSplit, prevSplitY));
+            splitYRef.current = newSplit;
+            return newSplit;
           });
         }
       }
@@ -587,10 +595,15 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   const snapToEdge = () => {
     if (!containerRef.current) return;
     const height = containerRef.current.getBoundingClientRect().height;
-    if (splitY < SNAP_THRESHOLD) {
-      setSplitY(DIVIDER_HEIGHT / 2);
-    } else if (splitY > height - SNAP_THRESHOLD) {
-      setSplitY(height - DIVIDER_HEIGHT / 2);
+    const currentSplitY = splitYRef.current;
+    if (currentSplitY < SNAP_THRESHOLD) {
+      const snapPosition = DIVIDER_HEIGHT / 2;
+      setSplitY(snapPosition);
+      splitYRef.current = snapPosition;
+    } else if (currentSplitY > height - SNAP_THRESHOLD) {
+      const snapPosition = height - DIVIDER_HEIGHT / 2;
+      setSplitY(snapPosition);
+      splitYRef.current = snapPosition;
     }
   };
 
@@ -644,6 +657,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       const newSplitY = Math.max(minSplit, Math.min(maxSplit, relativeSplitY));
       
       setSplitY(newSplitY);
+      splitYRef.current = newSplitY;
     };
 
     const onMouseUp = () => {
@@ -713,6 +727,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       const newSplitY = Math.max(minSplit, Math.min(maxSplit, relativeSplitY));
       
       setSplitY(newSplitY);
+      splitYRef.current = newSplitY;
     };
 
     const onTouchEnd = () => {
@@ -789,12 +804,26 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         </ContentContainer>
       </BottomPanel>
       {topHeight === 0 && (
-        <RestoreButton $position="top" onClick={() => setSplitY(containerHeight / 2)}>
+        <RestoreButton
+          $position="top"
+          onClick={() => {
+            const mid = containerHeight / 2;
+            setSplitY(mid);
+            splitYRef.current = mid;
+          }}
+        >
           ⬇️
         </RestoreButton>
       )}
       {bottomHeight === 0 && (
-        <RestoreButton $position="bottom" onClick={() => setSplitY(containerHeight / 2)}>
+        <RestoreButton
+          $position="bottom"
+          onClick={() => {
+            const mid = containerHeight / 2;
+            setSplitY(mid);
+            splitYRef.current = mid;
+          }}
+        >
           ⬆️
         </RestoreButton>
       )}
