@@ -283,7 +283,7 @@ const Divider = ({
   menuAccessories,
   menuIcon,
   menuColor,
-  backgroundColor,
+  isDragging,
 }: {
   top: number;
   onMouseDown: (e: React.MouseEvent) => void;
@@ -293,7 +293,7 @@ const Divider = ({
   menuAccessories?: MenuAccessory[];
   menuIcon?: React.ReactNode;
   menuColor?: string;
-  backgroundColor: string;
+  isDragging: boolean;
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -325,13 +325,13 @@ const Divider = ({
         width: '100%',
         height: DIVIDER_HEIGHT,
         top,
-        background: backgroundColor,
+        background: 'rgba(255, 255, 255, 0.05)',
         zIndex: 50,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'grab',
-        transition: 'top 0.25s ease',
+        transition: isDragging ? 'none' : 'top 0.25s ease',
       }}
     >
       <div style={{
@@ -502,6 +502,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   }, [splitY]);
   const [containerHeight, setContainerHeight] = useState<number>(0);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [isDragging, setIsDragging] = useState(false);
   const mouseMoveRef = useRef<(e: MouseEvent) => void>();
@@ -605,6 +606,8 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    setIsDragging(true);
     
     // Set grabbing cursor on the entire document during drag
     document.body.style.cursor = 'grabbing';
@@ -659,6 +662,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
       snapToEdge();
+      setIsDragging(false);
 
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
@@ -679,6 +683,8 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   const handleTouchStart = (e: React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    setIsDragging(true);
     
     const startY = e.touches[0].clientY;
     const startSplitY = splitY;
@@ -726,6 +732,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
 
     const onTouchEnd = () => {
       snapToEdge();
+      setIsDragging(false);
       document.removeEventListener('touchmove', onTouchMove as any);
       document.removeEventListener('touchend', onTouchEnd as any);
       setIsDragging(false);
@@ -778,12 +785,12 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         top={splitY - DIVIDER_HEIGHT / 2}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
+        isDragging={isDragging}
         leadingAccessories={leadingAccessories}
         trailingAccessories={trailingAccessories}
         menuAccessories={menuAccessories}
         menuIcon={menuIcon}
         menuColor={menuColor}
-        backgroundColor={effectiveBgColor}
       />
       
       {/* Bottom Panel - render even at 0 height */}

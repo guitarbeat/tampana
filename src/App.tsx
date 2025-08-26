@@ -327,7 +327,6 @@ function ThemedApp() {
     { label: 'Export as JSON', icon: <DocumentTextIcon />, onClick: handleExportJSON },
     { label: 'Export as CSV', icon: <ChartBarIcon />, onClick: handleExportCSV }
   ];
-  ];
 
   return (
     <AppContainer theme={theme}>
