@@ -3,9 +3,7 @@
   width: 100%;
   box-sizing: border-box;
 
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(16px) saturate(180%);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  background: #000000;
   color: #fff;
   font-size: 14px;
   border-radius: 16px;
@@ -47,18 +45,18 @@
   background: rgba(255, 255, 255, 0.35);
 }
 
-/* Modern dark theme with glass morphism */
+/* Modern dark theme with black background */
 .vuecal--dark-theme {
-  --vuecal-bg-color: transparent;
-  --vuecal-header-color: rgba(255, 255, 255, 0.03);
+  --vuecal-bg-color: #000000;
+  --vuecal-header-color: rgba(255, 255, 255, 0.05);
   --vuecal-header-text-color: rgba(255, 255, 255, 0.95);
   --vuecal-cell-color: transparent;
   --vuecal-cell-text-color: rgba(255, 255, 255, 0.85);
-  --vuecal-cell-today-bg-color: rgba(78, 205, 196, 0.08);
-  --vuecal-cell-current-bg-color: rgba(255, 255, 255, 0.04);
-  --vuecal-cell-selected-bg-color: rgba(78, 205, 196, 0.12);
+  --vuecal-cell-today-bg-color: rgba(78, 205, 196, 0.1);
+  --vuecal-cell-current-bg-color: rgba(255, 255, 255, 0.06);
+  --vuecal-cell-selected-bg-color: rgba(78, 205, 196, 0.15);
   --vuecal-cell-selected-text-color: #fff;
-  --vuecal-cell-hover-bg-color: rgba(255, 255, 255, 0.03);
+  --vuecal-cell-hover-bg-color: rgba(255, 255, 255, 0.04);
   --vuecal-event-bg-color: transparent;
   --vuecal-event-border-color: transparent;
   --vuecal-event-text-color: #fff;
@@ -77,26 +75,31 @@
 
 /* Enhanced navigation with modern styling */
 .vuecal__arrow {
-  color: rgba(255, 255, 255, 0.7) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
   border-radius: 12px !important;
-  padding: 10px !important;
+  padding: 12px !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(12px) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .vuecal__arrow:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
-  color: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
   transform: scale(1.05) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
 .vuecal__arrow:active {
-  transform: scale(0.98) !important;
+  transform: scale(0.95) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
 }
 
 /* Sophisticated today button */
@@ -162,19 +165,17 @@
 
 /* Modern all-day events section */
 .vuecal__all-day {
-  background: rgba(255, 255, 255, 0.03) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(12px) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 8px 8px 0 0 !important;
 }
 
 /* Sophisticated header styling */
 .vuecal__header {
   border: none !important;
-  backdrop-filter: blur(16px) !important;
-  background: rgba(255, 255, 255, 0.02) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
   border-radius: 12px 12px 0 0 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
 }
 
 .vuecal__title-bar {
