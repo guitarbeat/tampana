@@ -226,7 +226,7 @@ const BottomPanel = styled(Panel)<{ $top: number; $scale?: number }>`
   transition: top 0.25s ease, height 0.25s ease, transform 0.2s ease-out;
 `;
 
-const ContentContainer = styled.div<{ $position: 'top' | 'bottom' }>`
+const ContentContainer = styled.div<{ $padding?: number }>`
   height: 100%;
   width: 100%;
   display: flex;
@@ -234,13 +234,8 @@ const ContentContainer = styled.div<{ $position: 'top' | 'bottom' }>`
   overflow: auto;
   position: relative;
   box-sizing: border-box;
-
-  border-top-left-radius: ${props => props.$position === 'top' ? '32px' : '0'};
-  border-top-right-radius: ${props => props.$position === 'top' ? '32px' : '0'};
-  border-bottom-left-radius: ${props => props.$position === 'bottom' ? '32px' : '0'};
-  border-bottom-right-radius: ${props => props.$position === 'bottom' ? '32px' : '0'};
-
-  padding: 16px;
+  border-radius: 32px;
+  padding: ${props => props.$padding ?? 16}px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
   
@@ -774,7 +769,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         $backgroundColor={effectiveBgColor}
         $scale={topScale}
       >
-        <ContentContainer $position="top">
+        <ContentContainer $padding={0}>
           {effectiveTop}
           {topViewOverlay}
         </ContentContainer>
@@ -800,7 +795,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         $top={bottomTop}
         $scale={bottomScale}
       >
-        <ContentContainer $position="bottom">
+        <ContentContainer $padding={16}>
           {bottomViewOverlay ? bottomViewOverlay : effectiveBottom}
         </ContentContainer>
       </BottomPanel>

@@ -12,11 +12,8 @@ const CalendarContainer = styled.div`
   flex-direction: column;
   color: #fff;
   position: relative;
-  border-radius: 16px;
+  border-radius: 32px;
   overflow: hidden;
-  box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
 `;
 
 const CalendarWrapper = styled.div`
