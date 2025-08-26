@@ -320,12 +320,13 @@ function ThemedApp() {
     }
   ];
 
-  const menuItems = [
+  const menuAccessories = [
     { label: 'Add New Event', icon: <PlusIcon />, onClick: handleAddEvent },
     { label: 'Edit Mode', icon: <PencilSquareIcon />, onClick: handleEditMode },
     { label: 'Clear All Events', icon: <TrashIcon />, onClick: handleClearEvents },
     { label: 'Export as JSON', icon: <DocumentTextIcon />, onClick: handleExportJSON },
     { label: 'Export as CSV', icon: <ChartBarIcon />, onClick: handleExportCSV }
+  ];
   ];
 
   return (
@@ -334,7 +335,7 @@ function ThemedApp() {
       <VerticalSplit
         leadingAccessories={leadingAccessories}
         trailingAccessories={trailingAccessories}
-        menuItems={menuItems}
+        menuAccessories={menuAccessories}
       >
         <Panel>
           {showSettings ? (

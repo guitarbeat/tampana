@@ -472,7 +472,6 @@ interface VerticalSplitProps {
   leadingAccessories?: SplitAccessory[];
   trailingAccessories?: SplitAccessory[];
   menuAccessories?: MenuAccessory[];
-  menuItems?: MenuAccessory[];
   menuIcon?: React.ReactNode;
   menuColor?: string;
   children?: React.ReactNode;
@@ -491,7 +490,6 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   leadingAccessories,
   trailingAccessories,
   menuAccessories,
-  menuItems,
   menuIcon,
   menuColor,
   children,
@@ -518,7 +516,6 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   const childrenArray = React.Children.toArray(children);
   const effectiveTop = topView ?? childrenArray[0] ?? null;
   const effectiveBottom = bottomView ?? childrenArray[1] ?? null;
-  const effectiveMenu = menuItems ?? menuAccessories;
 
   // Initialize container height and split position
   useEffect(() => {
@@ -786,7 +783,7 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
         onTouchStart={handleTouchStart}
         leadingAccessories={leadingAccessories}
         trailingAccessories={trailingAccessories}
-        menuAccessories={effectiveMenu}
+        menuAccessories={menuAccessories}
         menuIcon={menuIcon}
         menuColor={menuColor}
         backgroundColor={effectiveBgColor}
