@@ -25,6 +25,7 @@ import { EventData } from './types/event-data';
 import { EmotionLog } from './types/emotion-log';
 import './index.css';
 import './styles/emotional-calendar.css';
+import './styles/typography.css';
 
 // Types for refs exposed by children
 export interface EmotionalCalendarHandle {
@@ -50,9 +51,10 @@ const GlobalStyle = styled.div`
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     background-color: #000;
     color: #fff;
   }
