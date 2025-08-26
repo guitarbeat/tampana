@@ -13,7 +13,10 @@ const SettingsContainer = styled.div<{ theme: any }>`
   h2 {
     color: ${props => props.theme.color};
     margin-bottom: 30px;
-    font-size: 24px;
+    font-size: var(--text-3xl);
+    font-weight: var(--font-semibold);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-tight);
     border-bottom: 2px solid ${props => props.theme.border};
     padding-bottom: 10px;
   }
@@ -24,7 +27,10 @@ const SettingsContainer = styled.div<{ theme: any }>`
     h3 {
       color: ${props => props.theme.color};
       margin-bottom: 15px;
-      font-size: 18px;
+      font-size: var(--text-xl);
+      font-weight: var(--font-medium);
+      line-height: var(--leading-snug);
+      letter-spacing: var(--tracking-tight);
     }
   }
   
@@ -36,12 +42,15 @@ const SettingsContainer = styled.div<{ theme: any }>`
     border: 1px solid ${props => props.theme.border};
     transition: background-color 0.3s ease, border-color 0.3s ease;
     
-    label {
-      display: flex;
-      align-items: center;
-      font-weight: 500;
-      cursor: pointer;
-      color: ${props => props.theme.inputColor};
+          label {
+        display: flex;
+        align-items: center;
+        font-weight: var(--font-medium);
+        font-size: var(--text-base);
+        line-height: var(--leading-normal);
+        letter-spacing: var(--tracking-wide);
+        cursor: pointer;
+        color: ${props => props.theme.inputColor};
       
       input[type="checkbox"] {
         margin-right: 12px;
@@ -67,11 +76,14 @@ const SettingsContainer = styled.div<{ theme: any }>`
       }
     }
     
-    .setting-description {
-      margin-top: 8px;
-      font-size: 14px;
-      color: ${props => props.theme.color === '#333333' ? '#666' : '#aaa'};
-    }
+          .setting-description {
+        margin-top: 8px;
+        font-size: var(--text-sm);
+        font-weight: var(--font-normal);
+        line-height: var(--leading-normal);
+        letter-spacing: var(--tracking-wide);
+        color: ${props => props.theme.color === '#333333' ? '#666' : '#aaa'};
+      }
   }
   
   .reset-section {
@@ -79,15 +91,18 @@ const SettingsContainer = styled.div<{ theme: any }>`
     padding-top: 20px;
     border-top: 2px solid ${props => props.theme.border};
     
-    .reset-button {
-      background: #f44336;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background 0.3s;
+          .reset-button {
+        background: #f44336;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: var(--text-base);
+        font-weight: var(--font-medium);
+        line-height: var(--leading-normal);
+        letter-spacing: var(--tracking-wide);
+        transition: background 0.3s;
       
       &:hover {
         background: #d32f2f;
