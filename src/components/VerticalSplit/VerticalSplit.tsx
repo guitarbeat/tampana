@@ -145,7 +145,6 @@ const MenuWrapper = styled.div`
 `;
 
 const MenuButton = styled(AccessoryButton)`
-  position: relative;
 `;
 
 const MenuContainer = styled.div<{ $isOpen: boolean }>`
@@ -412,7 +411,10 @@ const Divider = ({
           
           {/* Menu button if menu accessories exist */}
           {menuAccessories && menuAccessories.length > 0 && (
-            <MenuWrapper ref={menuRef}>
+            <div
+              ref={menuRef}
+              style={{ position: 'relative', display: 'inline-flex' }}
+            >
               <MenuButton
                 onClick={(e) => {
                   e.stopPropagation();
@@ -433,12 +435,7 @@ const Divider = ({
               </MenuButton>
 
               {/* Menu dropdown */}
-              <MenuContainer
-                $isOpen={isMenuOpen}
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-                onTouchStart={(e) => e.stopPropagation()}
-              >
+              <MenuContainer $isOpen={isMenuOpen}>
                 {menuAccessories.map((item, index) => (
                   <MenuItem
                     key={`menu-${index}`}
@@ -454,7 +451,7 @@ const Divider = ({
                   </MenuItem>
                 ))}
               </MenuContainer>
-            </MenuWrapper>
+            </div>
           )}
         </AccessoriesContainer>
       </div>
