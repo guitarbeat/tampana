@@ -198,9 +198,9 @@ function ThemedApp() {
     setEvents(updatedEvents);
   };
 
-  const handleEmojiSelect = (log: EmotionLog) => {
+  const handleEmojiSelect = useCallback((log: EmotionLog) => {
     logBufferRef.current.push(log);
-  };
+  }, []);
 
   const toggleWeekends = () => {
     setShowWeekends(!showWeekends);
@@ -248,10 +248,6 @@ function ThemedApp() {
   const handleExportCSV = () => {
     dataExportRef.current?.handleExportCSV();
   };
-
-  const handleEmojiSelect = useCallback((data: EmotionLog) => {
-    console.log('Emoji selected', data);
-  }, []);
 
   const leadingAccessories = [
     {

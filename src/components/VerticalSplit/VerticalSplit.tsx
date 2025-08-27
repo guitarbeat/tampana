@@ -498,8 +498,6 @@ const VerticalSplit: React.FC<VerticalSplitProps> = ({
   const [containerHeight, setContainerHeight] = useState<number>(0);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState(false);
-
-  const [isDragging, setIsDragging] = useState(false);
   const mouseMoveRef = useRef<(e: MouseEvent) => void>();
   const mouseUpRef = useRef<() => void>();
   const touchMoveRef = useRef<(e: TouchEvent) => void>();

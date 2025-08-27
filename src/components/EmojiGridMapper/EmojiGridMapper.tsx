@@ -180,7 +180,7 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
 
         if (vfxRef.current && backgroundRef.current) {
           vfxRef.current.remove(backgroundRef.current);
-          vfxRef.current.add(backgroundRef.current, { 
+          vfxRef.current.add(backgroundRef.current, {
             shader: "ripple",
             uniforms: {
               uTime: Date.now() * 0.001,
@@ -193,50 +193,26 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
       onDragEnd: function() {
         setIsDragging(false);
 
-        const { x: unitX, y: unitY } = lastPositionRef.current;
-        const currentEmoji = getEmoji(unitX, unitY);
-        const emotion = getEmotionLabel(unitX, unitY);
-        selectRef.current?.({
-          emoji: currentEmoji,
-          emotion,
-          position: { x: unitX, y: unitY },
-          valence: unitX,
-          arousal: unitY,
-          timestamp: new Date().toISOString()
-        });
-
-
-        // Throttle callback with current emoji
-        const now = Date.now();
-        if (now - lastEmitRef.current > 100) {
-          lastEmitRef.current = now;
-          const currentEmoji = getEmoji(unitX, unitY);
-          const emotion = getEmotionLabel(unitX, unitY);
-          onEmojiSelect?.({
-            emoji: currentEmoji,
-            emotion,
-            position: { x: unitX, y: unitY },
-            valence: unitX,
-            arousal: unitY,
-            timestamp: new Date().toISOString()
-          });
-        }
-      },
-      onDragEnd: function() {
-        setIsDragging(false);
-        
-
         // Remove VFX effects when drag ends
         if (vfxRef.current && backgroundRef.current) {
           vfxRef.current.remove(backgroundRef.current);
         }
 
-        
         // Emit final position before snapping back
         const endUnitX = this.x / radius;
         const endUnitY = -this.y / radius;
         const endEmoji = getEmoji(endUnitX, endUnitY);
         const endEmotion = getEmotionLabel(endUnitX, endUnitY);
+
+        selectRef.current?.({
+          emoji: endEmoji,
+          emotion: endEmotion,
+          position: { x: endUnitX, y: endUnitY },
+          valence: endUnitX,
+          arousal: endUnitY,
+          timestamp: new Date().toISOString()
+        });
+
         onEmojiSelect?.({
           emoji: endEmoji,
           emotion: endEmotion,
@@ -259,17 +235,17 @@ const EmojiGridMapper: React.FC<EmojiGridMapperProps> = ({ onEmojiSelect }) => {
           },
           onComplete: () => {
             setPosition({ x: 0, y: 0 });
-            
+
             // Add a very subtle ripple effect when returning to center
             if (vfxRef.current && backgroundRef.current) {
-              vfxRef.current.add(backgroundRef.current, { 
+              vfxRef.current.add(backgroundRef.current, {
                 shader: "ripple",
                 uniforms: {
                   uTime: 0,
                   uIntensity: 0.1
                 }
               });
-              
+
               // Remove the effect quickly
               setTimeout(() => {
                 if (vfxRef.current && backgroundRef.current) {

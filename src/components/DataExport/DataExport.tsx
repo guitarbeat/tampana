@@ -108,22 +108,58 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enab
     URL.revokeObjectURL(url);
   };
 
-  const exportAsJSON = () => {
-    const exportData = {
-      exportDate: new Date().toISOString(),
-      totalEvents: events.length,
-      events: events.map(event => ({
-        id: event.id,
-        title: event.title,
-        start: event.start.toISOString(),
-        end: event.end.toISOString(),
-        emotion: event.emotion,
-        emoji: event.emoji,
-        duration: Math.round((event.end.getTime() - event.start.getTime()) / (1000 * 60)) // duration in minutes
-      }))
-    };
+  const buildExportData = () => ({
+    exportDate: new Date().toISOString(),
+    totalEvents: events.length,
+    events: events.map(event => ({
+      id: event.id,
+      title: event.title,
+      start: event.start.toISOString(),
+      end: event.end.toISOString(),
+      emotion: event.emotion,
+      emoji: event.emoji,
+      duration: Math.round((event.end.getTime() - event.start.getTime()) / (1000 * 60)) // duration in minutes
+    }))
+  });
 
-    const jsonString = JSON.stringify(exportData, null, 2);
+  const buildEmotionSummary = () => {
+    const emotionCounts = events.reduce((acc, event) => {
+      acc[event.emotion] = (acc[event.emotion] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const totalEvents = events.length;
+    return {
+      exportDate: new Date().toISOString(),
+      totalEvents,
+      emotionBreakdown: Object.entries(emotionCounts)
+        .map(([emotion, count]) => ({
+          emotion,
+          count,
+          percentage: totalEvents > 0 ? Math.round((count / totalEvents) * 100) : 0
+        }))
+        .sort((a, b) => b.count - a.count),
+      mostCommonEmotion:
+        totalEvents > 0
+          ? (Object.entries(emotionCounts).reduce((a, b) =>
+              emotionCounts[a[0]] > emotionCounts[b[0]] ? a : b
+            )[0])
+          : null,
+      dateRange: {
+        earliest:
+          events.length > 0
+            ? new Date(Math.min(...events.map(e => e.start.getTime()))).toISOString()
+            : null,
+        latest:
+          events.length > 0
+            ? new Date(Math.max(...events.map(e => e.end.getTime()))).toISOString()
+            : null
+      }
+    };
+  };
+
+  const exportAsJSON = () => {
+    const jsonString = JSON.stringify(buildExportData(), null, 2);
     const filename = `tampana-emotions-${new Date().toISOString().split('T')[0]}.json`;
     downloadFile(jsonString, filename, 'application/json');
     if (enableToasts !== false) showToast('Exported JSON');
@@ -131,20 +167,7 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enab
   };
 
   const sendJSONToN8N = async () => {
-    const exportData = {
-      exportDate: new Date().toISOString(),
-      totalEvents: events.length,
-      events: events.map(event => ({
-        id: event.id,
-        title: event.title,
-        start: event.start.toISOString(),
-        end: event.end.toISOString(),
-        emotion: event.emotion,
-        emoji: event.emoji,
-        duration: Math.round((event.end.getTime() - event.start.getTime()) / (1000 * 60))
-      }))
-    };
-    const res = await postExport(exportData);
+    const res = await postExport(buildExportData());
     if (enableToasts !== false) showToast(res && 'queued' in res && res.queued ? 'Queued export to n8n' : 'Sent export to n8n');
     setIsDropdownOpen(false);
   };
@@ -172,28 +195,7 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enab
   };
 
   const exportEmotionSummary = () => {
-    const emotionCounts = events.reduce((acc, event) => {
-      acc[event.emotion] = (acc[event.emotion] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const totalEvents = events.length;
-    const summary = {
-      exportDate: new Date().toISOString(),
-      totalEvents,
-      emotionBreakdown: Object.entries(emotionCounts).map(([emotion, count]) => ({
-        emotion,
-        count,
-        percentage: Math.round((count / totalEvents) * 100)
-      })).sort((a, b) => b.count - a.count),
-      mostCommonEmotion: Object.entries(emotionCounts).reduce((a, b) => emotionCounts[a[0]] > emotionCounts[b[0]] ? a : b)[0],
-      dateRange: {
-        earliest: events.length > 0 ? new Date(Math.min(...events.map(e => e.start.getTime()))).toISOString() : null,
-        latest: events.length > 0 ? new Date(Math.max(...events.map(e => e.end.getTime()))).toISOString() : null
-      }
-    };
-
-    const jsonString = JSON.stringify(summary, null, 2);
+    const jsonString = JSON.stringify(buildEmotionSummary(), null, 2);
     const filename = `tampana-emotion-summary-${new Date().toISOString().split('T')[0]}.json`;
     downloadFile(jsonString, filename, 'application/json');
     if (enableToasts !== false) showToast('Exported Emotion Summary');
@@ -201,28 +203,7 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enab
   };
 
   const sendSummaryToN8N = async () => {
-    const emotionCounts = events.reduce((acc, event) => {
-      acc[event.emotion] = (acc[event.emotion] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const totalEvents = events.length;
-    const summary = {
-      exportDate: new Date().toISOString(),
-      totalEvents,
-      emotionBreakdown: Object.entries(emotionCounts).map(([emotion, count]) => ({
-        emotion,
-        count,
-        percentage: totalEvents > 0 ? Math.round((count / totalEvents) * 100) : 0
-      })).sort((a, b) => b.count - a.count),
-      mostCommonEmotion: Object.entries(emotionCounts).reduce((a, b) => (emotionCounts[a[0]] > emotionCounts[b[0]] ? a : b), ['', 0] as any)[0],
-      dateRange: {
-        earliest: events.length > 0 ? new Date(Math.min(...events.map(e => e.start.getTime()))).toISOString() : null,
-        latest: events.length > 0 ? new Date(Math.max(...events.map(e => e.end.getTime()))).toISOString() : null
-      }
-    } as any;
-
-    const res = await postSummary(summary);
+    const res = await postSummary(buildEmotionSummary());
     if (enableToasts !== false) showToast(res && 'queued' in res && res.queued ? 'Queued summary to n8n' : 'Sent summary to n8n');
     setIsDropdownOpen(false);
   };
@@ -263,20 +244,7 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enab
           </DropdownItem>
 
           <DropdownItem onClick={async () => {
-            const exportData = {
-              exportDate: new Date().toISOString(),
-              totalEvents: events.length,
-              events: events.map(event => ({
-                id: event.id,
-                title: event.title,
-                start: event.start.toISOString(),
-                end: event.end.toISOString(),
-                emotion: event.emotion,
-                emoji: event.emoji,
-                duration: Math.round((event.end.getTime() - event.start.getTime()) / (1000 * 60))
-              }))
-            };
-            const jsonString = JSON.stringify(exportData, null, 2);
+            const jsonString = JSON.stringify(buildExportData(), null, 2);
             try {
               await navigator.clipboard.writeText(jsonString);
               if (enableToasts !== false) showToast('Copied JSON to clipboard');
