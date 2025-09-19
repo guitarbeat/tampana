@@ -26,6 +26,8 @@ const ErrorContainer = styled.div`
   color: #fff;
   padding: 24px;
   text-align: center;
+  role: alert;
+  aria-live: assertive;
 `;
 
 const ErrorIcon = styled.div`
@@ -96,6 +98,11 @@ const Button = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
   font-weight: 500;
   transition: all 0.2s ease;
   min-width: 120px;
+
+  &:focus {
+    outline: 2px solid #4ECDC4;
+    outline-offset: 2px;
+  }
 
   ${props => {
     switch (props.variant) {

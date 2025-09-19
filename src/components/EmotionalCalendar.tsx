@@ -4,7 +4,7 @@ import EventModal from './EventModal';
 import styled from 'styled-components';
 import { EventData } from '../types/event-data';
 import { postEventChange } from '../services/n8nClient';
-import { getStorageItem, setStorageItem } from '../utils/storage';
+import { getStorageItem, setStorageItem, removeStorageItem } from '../utils/storage';
 import { withErrorBoundary } from '../utils/errorHandler';
 
 const CalendarContainer = styled.div`
@@ -178,7 +178,6 @@ const EmotionalCalendar = forwardRef<EmotionalCalendarHandle, EmotionalCalendarP
     handleClearEvents: () => {
       if (window.confirm('Are you sure you want to clear all events?')) {
         setEvents([]);
-        const { removeStorageItem } = require('../utils/storage');
         removeStorageItem('tampanaEvents', { silent: true });
       }
     }
@@ -193,71 +192,75 @@ const EmotionalCalendar = forwardRef<EmotionalCalendarHandle, EmotionalCalendarP
   }, [defaultEventDurationMinutes]);
 
   const handleEventSave = useCallback((eventData: Partial<EventData>) => {
-    withErrorBoundary(
-      () => {
-        if (eventData.id) {
-          // Update existing event
-          setEvents(prev => {
-            const updatedEvents = prev.map(event => 
-              event.id === eventData.id ? { ...event, ...eventData } as EventData : event
-            );
-            onEventsUpdate?.(updatedEvents);
-            const updated = updatedEvents.find(e => e.id === eventData.id);
-            if (updated) {
-              // Fire and forget; client handles queuing
-              postEventChange({
-                ...updated,
-                start: updated.start.toISOString(),
-                end: updated.end.toISOString(),
-              }, 'updated');
-            }
-            return updatedEvents;
-          });
-        } else {
-          // Create new event
-          const newEvent: EventData = {
-            id: Date.now().toString(),
-            title: eventData.title || 'New Event',
-            start: eventData.start!,
-            end: eventData.end!,
-            emotion: eventData.emotion || 'neutral',
-            emoji: eventData.emoji || '😐',
-            class: eventData.class || 'emotional-event neutral',
-            background: false,
-            allDay: false
-          };
-          
-          setEvents(prev => {
-            const updatedEvents = [...prev, newEvent];
-            onEventsUpdate?.(updatedEvents);
+    try {
+      if (eventData.id) {
+        // Update existing event
+        setEvents(prev => {
+          const updatedEvents = prev.map(event => 
+            event.id === eventData.id ? { ...event, ...eventData } as EventData : event
+          );
+          onEventsUpdate?.(updatedEvents);
+          const updated = updatedEvents.find(e => e.id === eventData.id);
+          if (updated) {
+            // Fire and forget; client handles queuing
             postEventChange({
-              ...newEvent,
-              start: newEvent.start.toISOString(),
-              end: newEvent.end.toISOString(),
-            }, 'created');
-            return updatedEvents;
-          });
-        }
-      },
-      undefined,
-      { component: 'EmotionalCalendar', action: 'handleEventSave' }
-    );
+              ...updated,
+              start: updated.start.toISOString(),
+              end: updated.end.toISOString(),
+            }, 'updated');
+          }
+          return updatedEvents;
+        });
+      } else {
+        // Create new event
+        const newEvent: EventData = {
+          id: Date.now().toString(),
+          title: eventData.title || 'New Event',
+          start: eventData.start!,
+          end: eventData.end!,
+          emotion: eventData.emotion || 'neutral',
+          emoji: eventData.emoji || '😐',
+          class: eventData.class || 'emotional-event neutral',
+          background: false,
+          allDay: false
+        };
+        
+        setEvents(prev => {
+          const updatedEvents = [...prev, newEvent];
+          onEventsUpdate?.(updatedEvents);
+          postEventChange({
+            ...newEvent,
+            start: newEvent.start.toISOString(),
+            end: newEvent.end.toISOString(),
+          }, 'created');
+          return updatedEvents;
+        });
+      }
+    } catch (error) {
+      withErrorBoundary(
+        () => { throw error; },
+        undefined,
+        { component: 'EmotionalCalendar', action: 'handleEventSave' }
+      );
+    }
   }, [onEventsUpdate]);
 
   const handleEventDelete = useCallback((eventId: string) => {
-    withErrorBoundary(
-      () => {
-        setEvents(prev => {
-          const updatedEvents = prev.filter(event => event.id !== eventId);
-          onEventsUpdate?.(updatedEvents);
-          // Send minimal payload for delete
-          postEventChange({ id: eventId }, 'deleted');
-          return updatedEvents;
-        });
-      },
-      undefined,
-      { component: 'EmotionalCalendar', action: 'handleEventDelete' }
-    );
+    try {
+      setEvents(prev => {
+        const updatedEvents = prev.filter(event => event.id !== eventId);
+        onEventsUpdate?.(updatedEvents);
+        // Send minimal payload for delete
+        postEventChange({ id: eventId }, 'deleted');
+        return updatedEvents;
+      });
+    } catch (error) {
+      withErrorBoundary(
+        () => { throw error; },
+        undefined,
+        { component: 'EmotionalCalendar', action: 'handleEventDelete' }
+      );
+    }
   }, [onEventsUpdate]);
 
   // Call onEventsUpdate when component mounts with initial events

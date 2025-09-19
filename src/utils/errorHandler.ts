@@ -150,9 +150,9 @@ class ErrorHandler {
    */
   async withErrorBoundary<T>(
     fn: () => Promise<T>,
-    fallback?: T,
+    fallback: T,
     context?: ErrorContext
-  ): Promise<T | undefined> {
+  ): Promise<T> {
     try {
       return await fn();
     } catch (error) {
@@ -186,16 +186,30 @@ class ErrorHandler {
   }
 
   private categorizeError(error: Error): ErrorType {
-    if (error.name === 'NetworkError' || error.message.includes('fetch')) {
+    // Check error codes first for more reliable categorization
+    if (error.name === 'NetworkError' || 
+        error.message.includes('fetch') || 
+        error.message.includes('network') ||
+        error.message.includes('connection') ||
+        error.message.includes('timeout')) {
       return ErrorType.NETWORK;
     }
-    if (error.name === 'ValidationError' || error.message.includes('validation')) {
+    if (error.name === 'ValidationError' || 
+        error.message.includes('validation') ||
+        error.message.includes('invalid') ||
+        error.message.includes('required')) {
       return ErrorType.VALIDATION;
     }
-    if (error.message.includes('localStorage') || error.message.includes('storage')) {
+    if (error.message.includes('localStorage') || 
+        error.message.includes('storage') ||
+        error.message.includes('quota') ||
+        error.message.includes('persist')) {
       return ErrorType.STORAGE;
     }
-    if (error.message.includes('API') || error.message.includes('HTTP')) {
+    if (error.message.includes('API') || 
+        error.message.includes('HTTP') ||
+        error.message.includes('status') ||
+        error.message.includes('endpoint')) {
       return ErrorType.API;
     }
     return ErrorType.UNKNOWN;

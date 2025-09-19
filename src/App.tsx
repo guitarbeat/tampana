@@ -97,7 +97,7 @@ function ThemedApp() {
         defaultValue: {}, 
         silent: true 
       });
-      if (settingsResult.success && settingsResult.data?.defaultView === 'day' || settingsResult.data?.defaultView === 'week' || settingsResult.data?.defaultView === 'month') {
+      if (settingsResult.success && (settingsResult.data?.defaultView === 'day' || settingsResult.data?.defaultView === 'week' || settingsResult.data?.defaultView === 'month')) {
         return settingsResult.data.defaultView as 'day' | 'week' | 'month';
       }
     }

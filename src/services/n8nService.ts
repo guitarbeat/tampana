@@ -120,7 +120,8 @@ class N8NService {
     let severity = ErrorSeverity.MEDIUM;
     let message = 'API request failed';
 
-    if (error.code === 'NETWORK_ERROR' || !error.response) {
+    // More robust network error detection
+    if (!error.response && (error.code === 'NETWORK_ERROR' || error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || !error.request)) {
       errorType = ErrorType.NETWORK;
       severity = ErrorSeverity.HIGH;
       message = 'Network connection failed';

@@ -21,6 +21,12 @@ class StorageManager {
     this.checkAvailability();
   }
 
+  /**
+   * NOTE: Memory storage fallback is not persisted across page reloads.
+   * This is a limitation of the in-memory storage approach.
+   * Data stored in memory will be lost when the page is refreshed or closed.
+   */
+
   private checkAvailability(): void {
     try {
       const testKey = '__storage_test__';
@@ -379,8 +385,12 @@ class StorageManager {
     try {
       return JSON.parse(value);
     } catch {
-      // If JSON parsing fails, return the raw string or default value
-      return (value as unknown as T) || defaultValue;
+      // If JSON parsing fails, check if we have a default value
+      if (defaultValue !== undefined) {
+        return defaultValue;
+      }
+      // Only return the raw string if no default is provided
+      return (value as unknown as T);
     }
   }
 

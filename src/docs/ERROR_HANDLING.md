@@ -323,6 +323,29 @@ In development mode, the error boundary shows detailed error information includi
 - Context information
 - Recovery options
 
+## Accessibility
+
+The error handling system includes comprehensive accessibility features:
+
+### Error Notifications
+- **ARIA Roles**: Notifications use `role="alert"` and `aria-live="polite"` for screen readers
+- **Focus Management**: Buttons are keyboard accessible with proper focus indicators
+- **Descriptive Labels**: All interactive elements have descriptive `aria-label` attributes
+- **Screen Reader Support**: Error messages are announced to screen readers
+
+### Error Boundary
+- **ARIA Live Regions**: Error boundary uses `aria-live="assertive"` for critical errors
+- **Keyboard Navigation**: All recovery buttons are keyboard accessible
+- **Focus Indicators**: Clear focus indicators for keyboard users
+- **Semantic HTML**: Proper heading structure and semantic elements
+
+### Best Practices
+1. **Error Announcements**: Critical errors are announced immediately to screen readers
+2. **Focus Management**: Focus is managed appropriately when errors occur
+3. **High Contrast**: Error messages use high contrast colors for visibility
+4. **Descriptive Text**: Error messages are clear and descriptive
+5. **Recovery Options**: Multiple recovery options are provided with clear labels
+
 ## Testing Error Handling
 
 ### Unit Tests
@@ -355,6 +378,29 @@ test('error boundary catches errors', () => {
   );
 
   expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+});
+```
+
+### Accessibility Tests
+Test accessibility features:
+```typescript
+import { render, screen } from '@testing-library/react';
+import { useErrorNotifications } from './hooks/useErrorNotifications';
+
+test('error notifications are accessible', () => {
+  const { result } = renderHook(() => useErrorNotifications());
+  
+  result.current.showError({
+    type: 'VALIDATION',
+    severity: 'MEDIUM',
+    message: 'Test error',
+    timestamp: new Date().toISOString(),
+    recoverable: true,
+    retryable: false
+  });
+
+  expect(screen.getByRole('alert')).toBeInTheDocument();
+  expect(screen.getByLabelText(/dismiss/i)).toBeInTheDocument();
 });
 ```
 

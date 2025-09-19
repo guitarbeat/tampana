@@ -28,6 +28,11 @@ class ErrorLogger {
 
   /**
    * Log an error with context
+   * 
+   * WARNING: This method logs user agent and URL information.
+   * Be careful not to log sensitive information, especially if error logs
+   * are exported or sent to external services. Consider sanitizing data
+   * before logging or implementing data filtering for sensitive fields.
    */
   logError(error: AppError, context?: {
     userId?: string;

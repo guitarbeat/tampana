@@ -54,6 +54,9 @@ const Notification = styled.div<{ type: ErrorNotification['type']; isExiting: bo
   animation: ${props => props.isExiting ? slideOut : slideIn} 0.3s ease-in-out;
   position: relative;
   overflow: hidden;
+  role: alert;
+  aria-live: polite;
+  tabindex: -1;
 `;
 
 const NotificationHeader = styled.div`
@@ -89,9 +92,15 @@ const CloseButton = styled.button`
   justify-content: center;
   opacity: 0.7;
   transition: opacity 0.2s ease;
+  aria-label: "Dismiss notification";
 
   &:hover {
     opacity: 1;
+  }
+
+  &:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
   }
 
   svg {
@@ -115,6 +124,11 @@ const ActionButton = styled.button`
   &:hover {
     background: rgba(255, 255, 255, 0.3);
     border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  &:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
   }
 `;
 
@@ -164,6 +178,20 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ notifications, 
     }, 300);
   };
 
+  // Sync exiting notifications with the actual notifications array
+  React.useEffect(() => {
+    const currentIds = new Set(notifications.map(n => n.id));
+    setExitingNotifications(prev => {
+      const newSet = new Set<string>();
+      prev.forEach(id => {
+        if (currentIds.has(id)) {
+          newSet.add(id);
+        }
+      });
+      return newSet;
+    });
+  }, [notifications]);
+
   const getIcon = (type: ErrorNotification['type']) => {
     switch (type) {
       case 'error':
@@ -211,8 +239,11 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ notifications, 
               <NotificationTitle>{notification.title}</NotificationTitle>
             </div>
             {notification.dismissible && (
-              <CloseButton onClick={() => handleDismiss(notification.id)}>
-                <svg viewBox="0 0 24 24" fill="currentColor">
+              <CloseButton 
+                onClick={() => handleDismiss(notification.id)}
+                aria-label={`Dismiss ${notification.title} notification`}
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
                 </svg>
               </CloseButton>
@@ -222,7 +253,10 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ notifications, 
           <NotificationMessage>{notification.message}</NotificationMessage>
           
           {notification.action && (
-            <ActionButton onClick={notification.action.handler}>
+            <ActionButton 
+              onClick={notification.action.handler}
+              aria-label={`${notification.action.label} for ${notification.title}`}
+            >
               {notification.action.label}
             </ActionButton>
           )}

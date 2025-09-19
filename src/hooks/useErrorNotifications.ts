@@ -14,6 +14,7 @@ interface UseErrorNotificationsReturn {
 
 export const useErrorNotifications = (): UseErrorNotificationsReturn => {
   const [notifications, setNotifications] = useState<ErrorNotification[]>([]);
+  const [timeoutIds, setTimeoutIds] = useState<Map<string, NodeJS.Timeout>>(new Map());
 
   const generateId = () => `notification-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
@@ -30,9 +31,15 @@ export const useErrorNotifications = (): UseErrorNotificationsReturn => {
 
     // Auto-dismiss after duration
     if (newNotification.duration && newNotification.duration > 0) {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         dismissNotification(id);
       }, newNotification.duration);
+      
+      setTimeoutIds(prev => {
+        const newMap = new Map(prev);
+        newMap.set(id, timeoutId);
+        return newMap;
+      });
     }
   }, []);
 
@@ -49,7 +56,9 @@ export const useErrorNotifications = (): UseErrorNotificationsReturn => {
         label: 'Retry',
         handler: () => {
           // Retry logic would be implemented based on the error context
-          console.log('Retry action triggered for error:', error);
+          // For now, we'll just show a message that retry is not implemented
+          console.warn('Retry action triggered for error:', error);
+          // TODO: Implement actual retry logic based on error context
         }
       } : undefined,
     });
@@ -83,10 +92,28 @@ export const useErrorNotifications = (): UseErrorNotificationsReturn => {
   }, [addNotification]);
 
   const dismissNotification = useCallback((id: string) => {
+    // Clear timeout if it exists
+    setTimeoutIds(prev => {
+      const timeoutId = prev.get(id);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        const newMap = new Map(prev);
+        newMap.delete(id);
+        return newMap;
+      }
+      return prev;
+    });
+    
     setNotifications(prev => prev.filter(notification => notification.id !== id));
   }, []);
 
   const clearAllNotifications = useCallback(() => {
+    // Clear all timeouts
+    setTimeoutIds(prev => {
+      prev.forEach(timeoutId => clearTimeout(timeoutId));
+      return new Map();
+    });
+    
     setNotifications([]);
   }, []);
 
