@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosError } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { subDays } from 'date-fns';
 import {
@@ -10,6 +10,9 @@ import {
   SyncStatus,
   N8NWorkflowTemplate
 } from '../types/n8n';
+import { ErrorType, ErrorSeverity } from '../types/errors';
+import { errorHandler, withRetry, withErrorBoundary } from '../utils/errorHandler';
+import { getStorageItem, setStorageItem } from '../utils/storage';
 
 class N8NService {
   private axiosInstance: AxiosInstance;
@@ -40,13 +43,17 @@ class N8NService {
   }
 
   private loadConfig(): N8NConfig {
-    const stored = localStorage.getItem('tampana_n8n_config');
-    if (stored) {
-      return JSON.parse(stored);
-    }
+    const result = getStorageItem<N8NConfig>('tampana_n8n_config', {
+      defaultValue: {
+        baseUrl: 'https://n8n.alw.lol',
+        enabled: false,
+        autoSync: false,
+        syncInterval: 15
+      },
+      silent: true
+    });
     
-    // Default configuration
-    return {
+    return result.success ? result.data! : {
       baseUrl: 'https://n8n.alw.lol',
       enabled: false,
       autoSync: false,
@@ -55,7 +62,22 @@ class N8NService {
   }
 
   private saveConfig(): void {
-    localStorage.setItem('tampana_n8n_config', JSON.stringify(this.config));
+    const result = setStorageItem('tampana_n8n_config', this.config);
+    if (!result.success) {
+      errorHandler.handleError(
+        errorHandler.createError(
+          ErrorType.STORAGE,
+          'Failed to save N8N configuration',
+          ErrorSeverity.MEDIUM,
+          {
+            details: { error: result.error },
+            context: 'N8NService.saveConfig',
+            recoverable: true,
+            retryable: true,
+          }
+        )
+      );
+    }
   }
 
   private setupInterceptors(): void {
@@ -66,15 +88,73 @@ class N8NService {
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => {
+        const appError = errorHandler.createError(
+          ErrorType.API,
+          'Failed to prepare N8N request',
+          ErrorSeverity.MEDIUM,
+          {
+            details: { error: error.message },
+            context: 'N8NService.requestInterceptor',
+            recoverable: true,
+            retryable: true,
+          }
+        );
+        errorHandler.handleError(appError);
+        return Promise.reject(appError);
+      }
     );
 
     this.axiosInstance.interceptors.response.use(
       (response) => response,
-      (error) => {
-        console.error('N8N API Error:', error);
-        this.updateSyncStatus('error', error.message);
-        return Promise.reject(error);
+      (error: AxiosError) => {
+        const appError = this.handleAxiosError(error);
+        this.updateSyncStatus('error', appError.message);
+        return Promise.reject(appError);
+      }
+    );
+  }
+
+  private handleAxiosError(error: AxiosError) {
+    let errorType = ErrorType.API;
+    let severity = ErrorSeverity.MEDIUM;
+    let message = 'API request failed';
+
+    if (error.code === 'NETWORK_ERROR' || !error.response) {
+      errorType = ErrorType.NETWORK;
+      severity = ErrorSeverity.HIGH;
+      message = 'Network connection failed';
+    } else if (error.response) {
+      const status = error.response.status;
+      if (status >= 500) {
+        severity = ErrorSeverity.HIGH;
+        message = 'Server error occurred';
+      } else if (status === 401 || status === 403) {
+        severity = ErrorSeverity.MEDIUM;
+        message = 'Authentication failed';
+      } else if (status === 404) {
+        severity = ErrorSeverity.LOW;
+        message = 'Resource not found';
+      } else if (status >= 400) {
+        severity = ErrorSeverity.MEDIUM;
+        message = 'Client error occurred';
+      }
+    }
+
+    return errorHandler.createError(
+      errorType,
+      message,
+      severity,
+      {
+        details: {
+          originalError: error,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+        },
+        context: 'N8NService.axiosInterceptor',
+        recoverable: true,
+        retryable: errorType === ErrorType.NETWORK || (error.response?.status && error.response.status >= 500),
       }
     );
   }
@@ -100,20 +180,28 @@ class N8NService {
   }
 
   public async testConnection(): Promise<N8NResponse> {
-    try {
-      const response = await this.axiosInstance.get('/api/v1/health');
-      return {
-        success: true,
-        message: 'Connection successful',
-        data: response.data
-      };
-    } catch (error: any) {
-      return {
+    return withErrorBoundary(
+      async () => {
+        const response = await withRetry(
+          () => this.axiosInstance.get('/api/v1/health'),
+          { maxAttempts: 3, delay: 1000 },
+          { component: 'N8NService', action: 'testConnection' }
+        );
+
+        this.updateSyncStatus('success');
+        return {
+          success: true,
+          message: 'Connection successful',
+          data: response.data
+        };
+      },
+      {
         success: false,
-        message: 'Connection failed',
-        error: error.message
-      };
-    }
+        message: 'Connection test failed',
+        error: 'Unable to connect to N8N service'
+      },
+      { component: 'N8NService', action: 'testConnection' }
+    );
   }
 
   public async sendWebhook(eventType: WebhookPayload['eventType'], data: any): Promise<boolean> {
@@ -121,30 +209,34 @@ class N8NService {
       return false;
     }
 
-    try {
-      const payload: WebhookPayload = {
-        eventType,
-        timestamp: new Date().toISOString(),
-        data,
-        sessionId: this.sessionId
-      };
+    return withErrorBoundary(
+      async () => {
+        const payload: WebhookPayload = {
+          eventType,
+          timestamp: new Date().toISOString(),
+          data,
+          sessionId: this.sessionId
+        };
 
-      await axios.post(this.config.webhookUrl, payload, {
-        timeout: 5000,
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'Tampana-Emotion-Tracker/1.0'
-        }
-      });
+        await withRetry(
+          () => axios.post(this.config.webhookUrl!, payload, {
+            timeout: 5000,
+            headers: {
+              'Content-Type': 'application/json',
+              'User-Agent': 'Tampana-Emotion-Tracker/1.0'
+            }
+          }),
+          { maxAttempts: 3, delay: 2000 },
+          { component: 'N8NService', action: 'sendWebhook', metadata: { eventType } }
+        );
 
-      this.updateSyncStatus('success');
-      this.syncStatus.webhooksSent++;
-      return true;
-    } catch (error) {
-      console.error('Webhook delivery failed:', error);
-      this.updateSyncStatus('error', 'Webhook delivery failed');
-      return false;
-    }
+        this.updateSyncStatus('success');
+        this.syncStatus.webhooksSent++;
+        return true;
+      },
+      false,
+      { component: 'N8NService', action: 'sendWebhook', metadata: { eventType } }
+    );
   }
 
   public async syncEmotionalData(events: EmotionalEvent[]): Promise<boolean> {

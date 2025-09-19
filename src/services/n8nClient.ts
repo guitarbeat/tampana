@@ -40,11 +40,16 @@ function getEnvConfig(): Partial<N8NConfig> {
 }
 
 export function loadConfig(): N8NConfig {
-  let stored: Partial<N8NConfig> = {};
-  try {
-    stored = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-  } catch (e) { /* ignore invalid JSON */ }
+  const { getStorageItem } = require('../utils/storage');
+  
+  const result = getStorageItem<Partial<N8NConfig>>(LOCAL_STORAGE_KEY, {
+    defaultValue: {},
+    silent: true
+  });
+  
+  const stored = result.success ? result.data || {} : {};
   const env = getEnvConfig();
+  
   const config: N8NConfig = {
     enabled: Boolean((stored as any).enabled ?? false),
     baseUrl: stored.baseUrl || env.baseUrl || '',
@@ -58,9 +63,15 @@ export function loadConfig(): N8NConfig {
 }
 
 export function saveConfig(next: Partial<N8NConfig>) {
+  const { setStorageItem } = require('../utils/storage');
+  
   const prev = loadConfig();
   const merged = { ...prev, ...next };
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+  
+  const result = setStorageItem(LOCAL_STORAGE_KEY, merged);
+  if (!result.success) {
+    console.warn('Failed to save N8N config:', result.error);
+  }
 }
 
 function buildUrl(baseUrl: string, path: string): string {
@@ -70,15 +81,23 @@ function buildUrl(baseUrl: string, path: string): string {
 }
 
 function readQueue(): QueuedRequest[] {
-  try {
-    return JSON.parse(localStorage.getItem(QUEUE_STORAGE_KEY) || '[]');
-  } catch (e) {
-    return [];
-  }
+  const { getStorageItem } = require('../utils/storage');
+  
+  const result = getStorageItem<QueuedRequest[]>(QUEUE_STORAGE_KEY, {
+    defaultValue: [],
+    silent: true
+  });
+  
+  return result.success ? result.data || [] : [];
 }
 
 function writeQueue(queue: QueuedRequest[]) {
-  localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(queue));
+  const { setStorageItem } = require('../utils/storage');
+  
+  const result = setStorageItem(QUEUE_STORAGE_KEY, queue);
+  if (!result.success) {
+    console.warn('Failed to save queue:', result.error);
+  }
 }
 
 function enqueue(request: Omit<QueuedRequest, 'id' | 'enqueuedAt' | 'attempt'>) {

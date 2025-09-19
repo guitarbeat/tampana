@@ -23,6 +23,9 @@ const SettingsPage = lazy(() => import('./components/SettingsPage'));
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { EventData } from './types/event-data';
 import { EmotionLog } from './types/emotion-log';
+import { useErrorNotifications } from './hooks/useErrorNotifications';
+import ErrorNotificationSystem from './components/ErrorNotificationSystem';
+import ErrorBoundary from './ErrorBoundary';
 import './index.css';
 import './styles/emotional-calendar.css';
 import './styles/typography.css';
@@ -80,57 +83,80 @@ const Panel = styled.div`
 
 function ThemedApp() {
   const { theme, themeName, toggleTheme } = useTheme();
+  const { notifications, dismissNotification } = useErrorNotifications();
   const [events, setEvents] = useState<EventData[]>([]);
   const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('tampanaCurrentView');
-      if (saved === 'day' || saved === 'week' || saved === 'month') return saved;
-      try {
-        const settings = JSON.parse(localStorage.getItem('tampanaSettings') || '{}');
-        if (settings.defaultView === 'day' || settings.defaultView === 'week' || settings.defaultView === 'month') {
-          return settings.defaultView;
-        }
-      } catch (e) { /* ignore invalid JSON */ }
+      const { getStorageItem } = require('./utils/storage');
+      const savedResult = getStorageItem<string>('tampanaCurrentView', { silent: true });
+      if (savedResult.success && (savedResult.data === 'day' || savedResult.data === 'week' || savedResult.data === 'month')) {
+        return savedResult.data;
+      }
+      
+      const settingsResult = getStorageItem<{ defaultView?: string }>('tampanaSettings', { 
+        defaultValue: {}, 
+        silent: true 
+      });
+      if (settingsResult.success && settingsResult.data?.defaultView === 'day' || settingsResult.data?.defaultView === 'week' || settingsResult.data?.defaultView === 'month') {
+        return settingsResult.data.defaultView as 'day' | 'week' | 'month';
+      }
     }
     return 'week';
   });
   const [, setCurrentDate] = useState(new Date()); // used to force-update date when clicking Today
   const [showWeekends, setShowWeekends] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('tampanaShowWeekends');
-      if (saved === 'true' || saved === 'false') return saved === 'true';
+      const { getStorageItem } = require('./utils/storage');
+      const result = getStorageItem<string>('tampanaShowWeekends', { silent: true });
+      if (result.success && (result.data === 'true' || result.data === 'false')) {
+        return result.data === 'true';
+      }
     }
     return true;
   });
   const [timeFormat24h, setTimeFormat24h] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('tampanaTimeFormat24h');
-      if (saved === 'true' || saved === 'false') return saved === 'true';
+      const { getStorageItem } = require('./utils/storage');
+      const result = getStorageItem<string>('tampanaTimeFormat24h', { silent: true });
+      if (result.success && (result.data === 'true' || result.data === 'false')) {
+        return result.data === 'true';
+      }
     }
     return false;
   });
   const [showSettings, setShowSettings] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('tampanaShowSettings');
-      if (saved === 'true' || saved === 'false') return saved === 'true';
+      const { getStorageItem } = require('./utils/storage');
+      const result = getStorageItem<string>('tampanaShowSettings', { silent: true });
+      if (result.success && (result.data === 'true' || result.data === 'false')) {
+        return result.data === 'true';
+      }
     }
     return false;
   });
   const [defaultEventDuration, setDefaultEventDuration] = useState<number>(() => {
     if (typeof window !== 'undefined') {
-      try {
-        const settings = JSON.parse(localStorage.getItem('tampanaSettings') || '{}');
-        if (typeof settings.eventDuration === 'number') return settings.eventDuration;
-      } catch (e) { /* ignore invalid JSON */ }
+      const { getStorageItem } = require('./utils/storage');
+      const result = getStorageItem<{ eventDuration?: number }>('tampanaSettings', { 
+        defaultValue: {}, 
+        silent: true 
+      });
+      if (result.success && typeof result.data?.eventDuration === 'number') {
+        return result.data.eventDuration;
+      }
     }
     return 60;
   });
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      try {
-        const settings = JSON.parse(localStorage.getItem('tampanaSettings') || '{}');
-        if (typeof settings.notifications === 'boolean') return settings.notifications;
-      } catch (e) { /* ignore invalid JSON */ }
+      const { getStorageItem } = require('./utils/storage');
+      const result = getStorageItem<{ notifications?: boolean }>('tampanaSettings', { 
+        defaultValue: {}, 
+        silent: true 
+      });
+      if (result.success && typeof result.data?.notifications === 'boolean') {
+        return result.data.notifications;
+      }
     }
     return true;
   });
@@ -154,19 +180,46 @@ function ThemedApp() {
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => { localStorage.setItem('tampanaCurrentView', currentView); }, [currentView]);
-  useEffect(() => { localStorage.setItem('tampanaShowWeekends', String(showWeekends)); }, [showWeekends]);
-  useEffect(() => { localStorage.setItem('tampanaTimeFormat24h', String(timeFormat24h)); }, [timeFormat24h]);
-  useEffect(() => { localStorage.setItem('tampanaShowSettings', String(showSettings)); }, [showSettings]);
+  useEffect(() => { 
+    const { setStorageItem } = require('./utils/storage');
+    setStorageItem('tampanaCurrentView', currentView, { silent: true });
+  }, [currentView]);
+  
+  useEffect(() => { 
+    const { setStorageItem } = require('./utils/storage');
+    setStorageItem('tampanaShowWeekends', String(showWeekends), { silent: true });
+  }, [showWeekends]);
+  
+  useEffect(() => { 
+    const { setStorageItem } = require('./utils/storage');
+    setStorageItem('tampanaTimeFormat24h', String(timeFormat24h), { silent: true });
+  }, [timeFormat24h]);
+  
+  useEffect(() => { 
+    const { setStorageItem } = require('./utils/storage');
+    setStorageItem('tampanaShowSettings', String(showSettings), { silent: true });
+  }, [showSettings]);
+  
   useEffect(() => {
-    const prev = (() => { try { return JSON.parse(localStorage.getItem('tampanaSettings') || '{}'); } catch { return {}; }})();
+    const { getStorageItem, setStorageItem } = require('./utils/storage');
+    const prevResult = getStorageItem<Record<string, any>>('tampanaSettings', { 
+      defaultValue: {}, 
+      silent: true 
+    });
+    const prev = prevResult.success ? prevResult.data || {} : {};
     const next = { ...prev, eventDuration: defaultEventDuration };
-    localStorage.setItem('tampanaSettings', JSON.stringify(next));
+    setStorageItem('tampanaSettings', next, { silent: true });
   }, [defaultEventDuration]);
+  
   useEffect(() => {
-    const prev = (() => { try { return JSON.parse(localStorage.getItem('tampanaSettings') || '{}'); } catch { return {}; }})();
+    const { getStorageItem, setStorageItem } = require('./utils/storage');
+    const prevResult = getStorageItem<Record<string, any>>('tampanaSettings', { 
+      defaultValue: {}, 
+      silent: true 
+    });
+    const prev = prevResult.success ? prevResult.data || {} : {};
     const next = { ...prev, notifications: notificationsEnabled };
-    localStorage.setItem('tampanaSettings', JSON.stringify(next));
+    setStorageItem('tampanaSettings', next, { silent: true });
   }, [notificationsEnabled]);
 
   useEffect(() => {
@@ -364,15 +417,21 @@ function ThemedApp() {
         </Panel>
       </VerticalSplit>
       <DataExport ref={dataExportRef} events={events} enableToasts={notificationsEnabled} />
+      <ErrorNotificationSystem 
+        notifications={notifications} 
+        onDismiss={dismissNotification} 
+      />
     </AppContainer>
   );
 }
 
 function App() {
   return (
-    <ThemeProvider>
-      <ThemedApp />
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <ThemedApp />
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
