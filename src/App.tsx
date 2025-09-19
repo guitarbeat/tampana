@@ -26,6 +26,7 @@ import { EmotionLog } from './types/emotion-log';
 import { useErrorNotifications } from './hooks/useErrorNotifications';
 import ErrorNotificationSystem from './components/ErrorNotificationSystem';
 import ErrorBoundary from './ErrorBoundary';
+import { getStorageItem, setStorageItem } from './utils/storage';
 import './index.css';
 import './styles/emotional-calendar.css';
 import './styles/typography.css';
@@ -87,13 +88,12 @@ function ThemedApp() {
   const [events, setEvents] = useState<EventData[]>([]);
   const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>(() => {
     if (typeof window !== 'undefined') {
-      const { getStorageItem } = require('./utils/storage');
-      const savedResult = getStorageItem<string>('tampanaCurrentView', { silent: true });
+      const savedResult = getStorageItem('tampanaCurrentView', { silent: true });
       if (savedResult.success && (savedResult.data === 'day' || savedResult.data === 'week' || savedResult.data === 'month')) {
-        return savedResult.data;
+        return savedResult.data as 'day' | 'week' | 'month';
       }
       
-      const settingsResult = getStorageItem<{ defaultView?: string }>('tampanaSettings', { 
+      const settingsResult = getStorageItem('tampanaSettings', { 
         defaultValue: {}, 
         silent: true 
       });
@@ -106,8 +106,7 @@ function ThemedApp() {
   const [, setCurrentDate] = useState(new Date()); // used to force-update date when clicking Today
   const [showWeekends, setShowWeekends] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const { getStorageItem } = require('./utils/storage');
-      const result = getStorageItem<string>('tampanaShowWeekends', { silent: true });
+      const result = getStorageItem('tampanaShowWeekends', { silent: true });
       if (result.success && (result.data === 'true' || result.data === 'false')) {
         return result.data === 'true';
       }
@@ -116,8 +115,7 @@ function ThemedApp() {
   });
   const [timeFormat24h, setTimeFormat24h] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const { getStorageItem } = require('./utils/storage');
-      const result = getStorageItem<string>('tampanaTimeFormat24h', { silent: true });
+      const result = getStorageItem('tampanaTimeFormat24h', { silent: true });
       if (result.success && (result.data === 'true' || result.data === 'false')) {
         return result.data === 'true';
       }
@@ -126,8 +124,7 @@ function ThemedApp() {
   });
   const [showSettings, setShowSettings] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const { getStorageItem } = require('./utils/storage');
-      const result = getStorageItem<string>('tampanaShowSettings', { silent: true });
+      const result = getStorageItem('tampanaShowSettings', { silent: true });
       if (result.success && (result.data === 'true' || result.data === 'false')) {
         return result.data === 'true';
       }
@@ -136,8 +133,7 @@ function ThemedApp() {
   });
   const [defaultEventDuration, setDefaultEventDuration] = useState<number>(() => {
     if (typeof window !== 'undefined') {
-      const { getStorageItem } = require('./utils/storage');
-      const result = getStorageItem<{ eventDuration?: number }>('tampanaSettings', { 
+      const result = getStorageItem('tampanaSettings', { 
         defaultValue: {}, 
         silent: true 
       });
@@ -149,8 +145,7 @@ function ThemedApp() {
   });
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const { getStorageItem } = require('./utils/storage');
-      const result = getStorageItem<{ notifications?: boolean }>('tampanaSettings', { 
+      const result = getStorageItem('tampanaSettings', { 
         defaultValue: {}, 
         silent: true 
       });
@@ -181,28 +176,23 @@ function ThemedApp() {
   }, []);
 
   useEffect(() => { 
-    const { setStorageItem } = require('./utils/storage');
     setStorageItem('tampanaCurrentView', currentView, { silent: true });
   }, [currentView]);
   
   useEffect(() => { 
-    const { setStorageItem } = require('./utils/storage');
     setStorageItem('tampanaShowWeekends', String(showWeekends), { silent: true });
   }, [showWeekends]);
   
   useEffect(() => { 
-    const { setStorageItem } = require('./utils/storage');
     setStorageItem('tampanaTimeFormat24h', String(timeFormat24h), { silent: true });
   }, [timeFormat24h]);
   
   useEffect(() => { 
-    const { setStorageItem } = require('./utils/storage');
     setStorageItem('tampanaShowSettings', String(showSettings), { silent: true });
   }, [showSettings]);
   
   useEffect(() => {
-    const { getStorageItem, setStorageItem } = require('./utils/storage');
-    const prevResult = getStorageItem<Record<string, any>>('tampanaSettings', { 
+    const prevResult = getStorageItem('tampanaSettings', { 
       defaultValue: {}, 
       silent: true 
     });
@@ -212,8 +202,7 @@ function ThemedApp() {
   }, [defaultEventDuration]);
   
   useEffect(() => {
-    const { getStorageItem, setStorageItem } = require('./utils/storage');
-    const prevResult = getStorageItem<Record<string, any>>('tampanaSettings', { 
+    const prevResult = getStorageItem('tampanaSettings', { 
       defaultValue: {}, 
       silent: true 
     });

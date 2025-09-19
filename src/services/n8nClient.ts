@@ -42,7 +42,7 @@ function getEnvConfig(): Partial<N8NConfig> {
 export function loadConfig(): N8NConfig {
   const { getStorageItem } = require('../utils/storage');
   
-  const result = getStorageItem<Partial<N8NConfig>>(LOCAL_STORAGE_KEY, {
+  const result = getStorageItem(LOCAL_STORAGE_KEY, {
     defaultValue: {},
     silent: true
   });
@@ -83,7 +83,7 @@ function buildUrl(baseUrl: string, path: string): string {
 function readQueue(): QueuedRequest[] {
   const { getStorageItem } = require('../utils/storage');
   
-  const result = getStorageItem<QueuedRequest[]>(QUEUE_STORAGE_KEY, {
+  const result = getStorageItem(QUEUE_STORAGE_KEY, {
     defaultValue: [],
     silent: true
   });

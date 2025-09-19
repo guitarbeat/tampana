@@ -155,7 +155,7 @@ class N8NService {
         },
         context: 'N8NService.axiosInterceptor',
         recoverable: true,
-        retryable: errorType === ErrorType.NETWORK || (error.response?.status && error.response.status >= 500),
+        retryable: errorType === ErrorType.NETWORK || (error.response?.status ? error.response.status >= 500 : false),
       }
     );
   }
@@ -181,28 +181,26 @@ class N8NService {
   }
 
   public async testConnection(): Promise<N8NResponse> {
-    return withErrorBoundary(
-      async () => {
-        const response = await withRetry(
-          () => this.axiosInstance.get('/api/v1/health'),
-          { maxAttempts: 3, delay: 1000 },
-          { component: 'N8NService', action: 'testConnection' }
-        );
+    try {
+      const response = await withRetry(
+        () => this.axiosInstance.get('/api/v1/health'),
+        { maxAttempts: 3, delay: 1000 },
+        { component: 'N8NService', action: 'testConnection' }
+      );
 
-        this.updateSyncStatus('success');
-        return {
-          success: true,
-          message: 'Connection successful',
-          data: response.data
-        };
-      },
-      {
+      this.updateSyncStatus('success');
+      return {
+        success: true,
+        message: 'Connection successful',
+        data: response.data
+      };
+    } catch (error) {
+      return {
         success: false,
         message: 'Connection test failed',
         error: 'Unable to connect to N8N service'
-      },
-      { component: 'N8NService', action: 'testConnection' }
-    );
+      };
+    }
   }
 
   public async sendWebhook(eventType: WebhookPayload['eventType'], data: any): Promise<boolean> {

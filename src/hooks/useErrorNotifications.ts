@@ -14,7 +14,7 @@ interface UseErrorNotificationsReturn {
 
 export const useErrorNotifications = (): UseErrorNotificationsReturn => {
   const [notifications, setNotifications] = useState<ErrorNotification[]>([]);
-  const [timeoutIds, setTimeoutIds] = useState<Map<string, NodeJS.Timeout>>(new Map());
+  const [, setTimeoutIds] = useState<Map<string, NodeJS.Timeout>>(new Map());
 
   const generateId = () => `notification-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
@@ -23,8 +23,8 @@ export const useErrorNotifications = (): UseErrorNotificationsReturn => {
     const newNotification: ErrorNotification = {
       id,
       duration: 5000,
-      dismissible: true,
       ...notification,
+      dismissible: notification.dismissible ?? true,
     };
 
     setNotifications(prev => [...prev, newNotification]);
@@ -52,6 +52,7 @@ export const useErrorNotifications = (): UseErrorNotificationsReturn => {
       title,
       message,
       duration: getErrorDuration(error.severity),
+      dismissible: true,
       action: error.recoverable ? {
         label: 'Retry',
         handler: () => {
@@ -70,6 +71,7 @@ export const useErrorNotifications = (): UseErrorNotificationsReturn => {
       title,
       message,
       duration: 3000,
+      dismissible: true,
     });
   }, [addNotification]);
 
@@ -79,6 +81,7 @@ export const useErrorNotifications = (): UseErrorNotificationsReturn => {
       title,
       message,
       duration: 4000,
+      dismissible: true,
     });
   }, [addNotification]);
 
@@ -88,6 +91,7 @@ export const useErrorNotifications = (): UseErrorNotificationsReturn => {
       title,
       message,
       duration: 3000,
+      dismissible: true,
     });
   }, [addNotification]);
 

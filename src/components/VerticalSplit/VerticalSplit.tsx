@@ -139,10 +139,10 @@ const Tooltip = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.08);
 `;
 
-const MenuWrapper = styled.div`
-  position: relative;
-  display: inline-block;
-`;
+// const MenuWrapper = styled.div`
+//   position: relative;
+//   display: inline-block;
+// `;
 
 const MenuButton = styled(AccessoryButton)`
 `;

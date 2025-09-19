@@ -1,4 +1,4 @@
-import { AppError, ErrorSeverity } from '../types/errors';
+import { AppError } from '../types/errors';
 import { getStorageItem, setStorageItem } from './storage';
 
 interface ErrorLogEntry {
