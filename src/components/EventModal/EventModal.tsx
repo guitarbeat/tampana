@@ -157,7 +157,7 @@ const ButtonGroup = styled.div`
   margin-top: 24px;
 `;
 
-const Button = styled.button<{ variant?: 'primary' | 'danger' }>`
+const Button = styled.button<{ $variant?: 'primary' | 'danger' }>`
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
@@ -167,7 +167,7 @@ const Button = styled.button<{ variant?: 'primary' | 'danger' }>`
   transition: all 0.2s ease;
   
   ${props => {
-    switch (props.variant) {
+    switch (props.$variant) {
       case 'primary':
         return `
           background: #4ECDC4;
@@ -375,14 +375,14 @@ const EventModal: React.FC<EventModalProps> = ({
 
         <ButtonGroup>
           {event && onDelete && (
-            <Button variant="danger" onClick={handleDelete}>
+            <Button $variant="danger" onClick={handleDelete}>
               Delete Event
             </Button>
           )}
           <Button onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleSave}>
+          <Button $variant="primary" onClick={handleSave}>
             {event ? 'Update Event' : 'Create Event'}
           </Button>
         </ButtonGroup>

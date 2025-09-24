@@ -6,14 +6,14 @@ const spin = keyframes`
   100% { transform: rotate(360deg); }
 `;
 
-const Container = styled.div<{ fullScreen?: boolean }>`
+const Container = styled.div<{ $fullScreen?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 40px;
   color: #ccc;
-  ${({ fullScreen }) =>
-    fullScreen &&
+  ${({ $fullScreen }) =>
+    $fullScreen &&
     css`
       position: fixed;
       inset: 0;
@@ -45,7 +45,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   message = 'Loading…',
   fullScreen = true,
 }) => (
-  <Container fullScreen={fullScreen}>
+  <Container $fullScreen={fullScreen}>
     <Spinner />
     <Message>{message}</Message>
   </Container>

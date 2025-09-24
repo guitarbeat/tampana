@@ -10,7 +10,7 @@ const ExportContainer = styled.div`
   z-index: 1000;
 `;
 
-const DropdownMenu = styled.div<{ isOpen: boolean }>`
+const DropdownMenu = styled.div<{ $isOpen: boolean }>`
   position: absolute;
   top: 0;
   right: 0;
@@ -20,7 +20,7 @@ const DropdownMenu = styled.div<{ isOpen: boolean }>`
   padding: 8px 0;
   min-width: 180px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  display: ${props => props.isOpen ? 'block' : 'none'};
+  display: ${props => props.$isOpen ? 'block' : 'none'};
   z-index: 1001;
 `;
 
@@ -48,7 +48,7 @@ const DropdownItem = styled.button`
   }
 `;
 
-const NotificationToast = styled.div<{ show: boolean }>`
+const NotificationToast = styled.div<{ $show: boolean }>`
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -59,8 +59,8 @@ const NotificationToast = styled.div<{ show: boolean }>`
   font-size: 14px;
   font-weight: 500;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transform: translateY(${props => props.show ? '0' : '100px'});
-  opacity: ${props => props.show ? '1' : '0'};
+  transform: translateY(${props => props.$show ? '0' : '100px'});
+  opacity: ${props => props.$show ? '1' : '0'};
   transition: all 0.3s ease;
   z-index: 1002;
   display: flex;
@@ -221,7 +221,7 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enab
   return (
     <>
       <ExportContainer>
-        <DropdownMenu isOpen={isDropdownOpen}>
+        <DropdownMenu $isOpen={isDropdownOpen}>
           <DropdownItem onClick={exportAsJSON}>
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M5,3H7V5H5V10A2,2 0 0,1 3,8V6A2,2 0 0,1 5,4V3M19,3V4A2,2 0 0,1 21,6V8A2,2 0 0,1 19,10V5H17V3H19M5,21V20A2,2 0 0,1 3,18V16A2,2 0 0,1 5,14V19H7V21H5M19,21H17V19H19V14A2,2 0 0,1 21,16V18A2,2 0 0,1 19,20V21M12,8A2,2 0 0,1 14,10V14A2,2 0 0,1 12,16H10V14H12V10H10V8H12Z" />
@@ -276,7 +276,7 @@ const DataExport = forwardRef<DataExportHandle, DataExportProps>(({ events, enab
         </DropdownMenu>
       </ExportContainer>
 
-      <NotificationToast show={showNotification} aria-live="polite" role="status">
+      <NotificationToast $show={showNotification} aria-live="polite" role="status">
         <svg viewBox="0 0 24 24" fill="currentColor">
           <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,16.5L18,9.5L16.59,8.09L11,13.67L7.91,10.59L6.5,12L11,16.5Z" />
         </svg>

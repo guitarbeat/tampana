@@ -1,6 +1,6 @@
 import { useState, useRef, lazy, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import VerticalSplit from './components/VerticalSplit/VerticalSplit';
+import SplitScreen from './components/SplitScreen/SplitScreen';
 import {
   CalendarDaysIcon,
   ChartBarIcon,
@@ -371,10 +371,12 @@ function ThemedApp() {
   return (
     <AppContainer theme={theme}>
       <GlobalStyle />
-      <VerticalSplit
-        leadingAccessories={leadingAccessories}
-        trailingAccessories={trailingAccessories}
-        menuAccessories={menuAccessories}
+      <SplitScreen
+        borderRadius={30}
+        handleHeight={30}
+        topSnapPointHeight={120}
+        bottomSnapPointHeight={100}
+        inBetweenSnapPoints={({ height }) => [height / 3, height / 1.5]}
       >
         <Panel>
           {showSettings ? (
@@ -404,7 +406,7 @@ function ThemedApp() {
         <Panel>
           <EmojiGridMapper onEmojiSelect={handleEmojiSelect} />
         </Panel>
-      </VerticalSplit>
+      </SplitScreen>
       <DataExport ref={dataExportRef} events={events} enableToasts={notificationsEnabled} />
       <ErrorNotificationSystem 
         notifications={notifications} 

@@ -1,10 +1,10 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Import custom styles */
 @import "./styles/typography.css";
 @import "./styles/glass.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Enhanced base styles */
 @layer base {

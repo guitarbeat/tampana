@@ -89,7 +89,7 @@ const ButtonGroup = styled.div`
   justify-content: center;
 `;
 
-const Button = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
+const Button = styled.button<{ $variant?: 'primary' | 'secondary' | 'danger' }>`
   padding: 12px 24px;
   border-radius: 8px;
   border: none;
@@ -105,7 +105,7 @@ const Button = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
   }
 
   ${props => {
-    switch (props.variant) {
+    switch (props.$variant) {
       case 'primary':
         return `
           background: #4ECDC4;
@@ -304,16 +304,16 @@ class ErrorBoundary extends Component<Props, State> {
 
           <ButtonGroup>
             {!isMaxRetries && (
-              <Button variant="primary" onClick={this.handleRetry}>
+              <Button $variant="primary" onClick={this.handleRetry}>
                 Try Again ({this.maxRetries - retryCount} left)
               </Button>
             )}
             
-            <Button variant="secondary" onClick={this.handleReload}>
+            <Button $variant="secondary" onClick={this.handleReload}>
               Reload Page
             </Button>
             
-            <Button variant="danger" onClick={this.handleReset}>
+            <Button $variant="danger" onClick={this.handleReset}>
               Reset & Reload
             </Button>
           </ButtonGroup>

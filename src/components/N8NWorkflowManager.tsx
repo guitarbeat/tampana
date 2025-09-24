@@ -109,7 +109,7 @@ const MetaTag = styled.span<{ type: string }>`
   }}
 `;
 
-const Button = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
+const Button = styled.button<{ $variant?: 'primary' | 'secondary' | 'danger' }>`
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
@@ -119,8 +119,8 @@ const Button = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
   transition: all 0.2s ease;
   margin-right: 8px;
   
-  ${({ variant }) => {
-    switch (variant) {
+  ${({ $variant }) => {
+    switch ($variant) {
       case 'primary':
         return `
           background: #007acc;
@@ -250,19 +250,19 @@ const N8NWorkflowManager: React.FC = () => {
       <div>
         {isDeployed ? (
           <>
-            <Button variant="secondary" onClick={() => handleRemoveWorkflow(workflow.id)}>
+            <Button $variant="secondary" onClick={() => handleRemoveWorkflow(workflow.id)}>
               Remove
             </Button>
-            <Button variant="primary">
+            <Button $variant="primary">
               Configure
             </Button>
           </>
         ) : (
           <>
-            <Button variant="primary" onClick={() => handleDeployWorkflow(workflow)}>
+            <Button $variant="primary" onClick={() => handleDeployWorkflow(workflow)}>
               Deploy
             </Button>
-            <Button variant="secondary">
+            <Button $variant="secondary">
               Preview
             </Button>
           </>

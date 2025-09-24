@@ -70,7 +70,7 @@ const Checkbox = styled.input`
   transform: scale(1.2);
 `;
 
-const Button = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
+const Button = styled.button<{ $variant?: 'primary' | 'secondary' | 'danger' }>`
   padding: 12px 24px;
   border: none;
   border-radius: 6px;
@@ -80,8 +80,8 @@ const Button = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
   transition: all 0.2s ease;
   margin-right: 12px;
   
-  ${({ variant }) => {
-    switch (variant) {
+  ${({ $variant }) => {
+    switch ($variant) {
       case 'primary':
         return `
           background: #007acc;
@@ -331,10 +331,10 @@ const N8NConfigPanel: React.FC = () => {
         <Button onClick={handleTestConnection} disabled={isTesting}>
           {isTesting ? 'Testing...' : 'Test Connection'}
         </Button>
-        <Button variant="primary" onClick={handleSave} disabled={isSaving}>
+        <Button $variant="primary" onClick={handleSave} disabled={isSaving}>
           {isSaving ? 'Saving...' : 'Save Configuration'}
         </Button>
-        <Button variant="secondary" onClick={handleReset}>
+        <Button $variant="secondary" onClick={handleReset}>
           Reset to Defaults
         </Button>
       </div>

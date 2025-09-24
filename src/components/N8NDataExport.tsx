@@ -51,7 +51,7 @@ const CardDescription = styled.p`
   line-height: 1.4;
 `;
 
-const Button = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
+const Button = styled.button<{ $variant?: 'primary' | 'secondary' | 'danger' }>`
   padding: 10px 20px;
   border: none;
   border-radius: 6px;
@@ -61,8 +61,8 @@ const Button = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
   transition: all 0.2s ease;
   width: 100%;
   
-  ${({ variant }) => {
-    switch (variant) {
+  ${({ $variant }) => {
+    switch ($variant) {
       case 'primary':
         return `
           background: #007acc;
