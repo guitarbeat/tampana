@@ -199,10 +199,10 @@ A comprehensive list of tasks to improve the Tampana emotion tracking applicatio
   - Set up branch protection rules
   - Configure required status checks
   - Enable security alerts
-- [ ] **Add community files**
-  - CODE_OF_CONDUCT.md
-  - SECURITY.md for vulnerability reporting
-  - SUPPORT.md for user help
+- [x] **Add community files** ✅
+  - [x] CODE_OF_CONDUCT.md ✅
+  - [x] SECURITY.md for vulnerability reporting ✅
+  - [x] SUPPORT.md for user help ✅
 
 ### Release Management
 - [ ] **Prepare first stable release**
