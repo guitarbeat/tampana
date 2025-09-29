@@ -1,21 +1,8 @@
 import { useState, useRef, lazy, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import SplitScreen from './components/SplitScreen/SplitScreen';
-import {
-  CalendarDaysIcon,
-  ChartBarIcon,
-  CalendarIcon,
-  HomeIcon,
-  SunIcon,
-  MoonIcon,
-  ArrowUpTrayIcon,
-  ClockIcon,
-  Cog6ToothIcon,
-  PlusIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  DocumentTextIcon,
-} from './icons';
+// NOTE: Icons import removed as they are only used in commented-out toolbar code
+// TODO: Restore when implementing toolbar features
 const EmotionalCalendar = lazy(() => import('./components/EmotionalCalendar'));
 const EmojiGridMapper = lazy(() => import('./components/EmojiGridMapper/EmojiGridMapper'));
 const DataExport = lazy(() => import('./components/DataExport'));
@@ -252,121 +239,125 @@ function ThemedApp() {
     setTimeFormat24h(!timeFormat24h);
   };
 
-  const handleSettingsClick = () => {
-    setShowSettings(!showSettings);
-  };
+  // TODO: These functions are prepared for future toolbar implementation
+  // const handleSettingsClick = () => {
+  //   setShowSettings(!showSettings);
+  // };
 
-  const handleViewChange = (view: 'day' | 'week' | 'month') => {
-    setCurrentView(view);
-    calendarRef.current?.handleViewChange(view);
-  };
+  // const handleViewChange = (view: 'day' | 'week' | 'month') => {
+  //   setCurrentView(view);
+  //   calendarRef.current?.handleViewChange(view);
+  // };
 
-  const handleTodayClick = () => {
-    const today = new Date();
-    setCurrentDate(today);
-    calendarRef.current?.handleTodayClick();
-  };
+  // const handleTodayClick = () => {
+  //   const today = new Date();
+  //   setCurrentDate(today);
+  //   calendarRef.current?.handleTodayClick();
+  // };
 
-  const handleAddEvent = () => {
-    calendarRef.current?.handleAddEvent();
-  };
+  // const handleAddEvent = () => {
+  //   calendarRef.current?.handleAddEvent();
+  // };
 
-  const handleEditMode = () => {
-    calendarRef.current?.handleEditMode();
-  };
+  // const handleEditMode = () => {
+  //   calendarRef.current?.handleEditMode();
+  // };
 
-  const handleClearEvents = () => {
-    calendarRef.current?.handleClearEvents();
-  };
+  // const handleClearEvents = () => {
+  //   calendarRef.current?.handleClearEvents();
+  // };
 
-  const handleExportData = () => {
-    dataExportRef.current?.handleExport();
-  };
+  // const handleExportData = () => {
+  //   dataExportRef.current?.handleExport();
+  // };
 
-  const handleExportJSON = () => {
-    dataExportRef.current?.handleExportJSON();
-  };
+  // const handleExportJSON = () => {
+  //   dataExportRef.current?.handleExportJSON();
+  // };
 
-  const handleExportCSV = () => {
-    dataExportRef.current?.handleExportCSV();
-  };
+  // const handleExportCSV = () => {
+  //   dataExportRef.current?.handleExportCSV();
+  // };
 
-  const leadingAccessories = [
-    {
-      icon: <CalendarDaysIcon />,
-      tooltip: 'Day View (1)',
-      onClick: () => handleViewChange('day'),
-      isActive: currentView === 'day',
-      color: currentView === 'day' ? '#4CAF50' : '#666'
-    },
-    {
-      icon: <ChartBarIcon />,
-      tooltip: 'Week View (2)',
-      onClick: () => handleViewChange('week'),
-      isActive: currentView === 'week',
-      color: currentView === 'week' ? '#2196F3' : '#666'
-    },
-    {
-      icon: <CalendarIcon />,
-      tooltip: 'Month View (3)',
-      onClick: () => handleViewChange('month'),
-      isActive: currentView === 'month',
-      color: currentView === 'month' ? '#9C27B0' : '#666'
-    },
-    {
-      icon: <HomeIcon />,
-      tooltip: 'Today (T)',
-      onClick: handleTodayClick,
-      isActive: false,
-      color: '#FFD700'
-    }
-  ];
+  // TODO: These accessories are prepared for future toolbar implementation
+  // const leadingAccessories = [
+  //   {
+  //     icon: <CalendarDaysIcon />,
+  //     tooltip: 'Day View (1)',
+  //     onClick: () => handleViewChange('day'),
+  //     isActive: currentView === 'day',
+  //     color: currentView === 'day' ? '#4CAF50' : '#666'
+  //   },
+  //   {
+  //     icon: <ChartBarIcon />,
+  //     tooltip: 'Week View (2)',
+  //     onClick: () => handleViewChange('week'),
+  //     isActive: currentView === 'week',
+  //     color: currentView === 'week' ? '#2196F3' : '#666'
+  //   },
+  //   {
+  //     icon: <CalendarIcon />,
+  //     tooltip: 'Month View (3)',
+  //     onClick: () => handleViewChange('month'),
+  //     isActive: currentView === 'month',
+  //     color: currentView === 'month' ? '#9C27B0' : '#666'
+  //   },
+  //   {
+  //     icon: <HomeIcon />,
+  //     tooltip: 'Today (T)',
+  //     onClick: handleTodayClick,
+  //     isActive: false,
+  //     color: '#FFD700'
+  //   }
+  // ];
 
-  const trailingAccessories = [
-    {
-      icon: themeName === 'dark' ? <SunIcon /> : <MoonIcon />,
-      tooltip: themeName === 'dark' ? 'Switch to Day Mode' : 'Switch to Night Mode',
-      onClick: toggleTheme,
-      isActive: false,
-      color: themeName === 'dark' ? '#FFD700' : '#4169E1'
-    },
-    {
-      icon: <ArrowUpTrayIcon />,
-      tooltip: 'Export Data (E)',
-      onClick: handleExportData,
-      isActive: false,
-      color: '#FF9800'
-    },
-    {
-      icon: showWeekends ? <CalendarDaysIcon /> : <CalendarIcon />,
-      tooltip: showWeekends ? 'Hide Weekends (W)' : 'Show Weekends (W)',
-      onClick: toggleWeekends,
-      isActive: showWeekends,
-      color: showWeekends ? '#4CAF50' : '#666'
-    },
-    {
-      icon: <ClockIcon />,
-      tooltip: timeFormat24h ? '12h Format (F)' : '24h Format (F)',
-      onClick: toggleTimeFormat,
-      isActive: timeFormat24h,
-      color: timeFormat24h ? '#2196F3' : '#666'
-    },
-    {
-      icon: <Cog6ToothIcon />,
-      tooltip: 'Settings (S)',
-      onClick: handleSettingsClick,
-      isActive: showSettings,
-      color: showSettings ? '#FF5722' : '#666'
-    }
-  ];
+  // TODO: These accessories are prepared for future toolbar implementation
+  // const trailingAccessories = [
+  //   {
+  //     icon: themeName === 'dark' ? <SunIcon /> : <MoonIcon />,
+  //     tooltip: themeName === 'dark' ? 'Switch to Day Mode' : 'Switch to Night Mode',
+  //     onClick: toggleTheme,
+  //     isActive: false,
+  //     color: themeName === 'dark' ? '#FFD700' : '#4169E1'
+  //   },
+  //   {
+  //     icon: <ArrowUpTrayIcon />,
+  //     tooltip: 'Export Data (E)',
+  //     onClick: handleExportData,
+  //     isActive: false,
+  //     color: '#FF9800'
+  //   },
+  //   {
+  //     icon: showWeekends ? <CalendarDaysIcon /> : <CalendarIcon />,
+  //     tooltip: showWeekends ? 'Hide Weekends (W)' : 'Show Weekends (W)',
+  //     onClick: toggleWeekends,
+  //     isActive: showWeekends,
+  //     color: showWeekends ? '#4CAF50' : '#666'
+  //   },
+  //   {
+  //     icon: <ClockIcon />,
+  //     tooltip: timeFormat24h ? '12h Format (F)' : '24h Format (F)',
+  //     onClick: toggleTimeFormat,
+  //     isActive: timeFormat24h,
+  //     color: timeFormat24h ? '#2196F3' : '#666'
+  //   },
+  //   {
+  //     icon: <Cog6ToothIcon />,
+  //     tooltip: 'Settings (S)',
+  //     onClick: handleSettingsClick,
+  //     isActive: showSettings,
+  //     color: showSettings ? '#FF5722' : '#666'
+  //   }
+  // ];
 
-  const menuAccessories = [
-    { label: 'Add New Event', icon: <PlusIcon />, onClick: handleAddEvent },
-    { label: 'Edit Mode', icon: <PencilSquareIcon />, onClick: handleEditMode },
-    { label: 'Clear All Events', icon: <TrashIcon />, onClick: handleClearEvents },
-    { label: 'Export as JSON', icon: <DocumentTextIcon />, onClick: handleExportJSON },
-    { label: 'Export as CSV', icon: <ChartBarIcon />, onClick: handleExportCSV }
-  ];
+  // TODO: These accessories are prepared for future menu implementation
+  // const menuAccessories = [
+  //   { label: 'Add New Event', icon: <PlusIcon />, onClick: handleAddEvent },
+  //   { label: 'Edit Mode', icon: <PencilSquareIcon />, onClick: handleEditMode },
+  //   { label: 'Clear All Events', icon: <TrashIcon />, onClick: handleClearEvents },
+  //   { label: 'Export as JSON', icon: <DocumentTextIcon />, onClick: handleExportJSON },
+  //   { label: 'Export as CSV', icon: <ChartBarIcon />, onClick: handleExportCSV }
+  // ];
 
   return (
     <AppContainer theme={theme}>

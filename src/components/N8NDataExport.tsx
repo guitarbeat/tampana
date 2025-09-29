@@ -364,7 +364,7 @@ const N8NDataExport: React.FC<N8NDataExportProps> = ({ events }) => {
             Export emotional data in JSON format for N8N workflows
           </CardDescription>
           <Button
-            variant="primary"
+            $variant="primary"
             onClick={() => handleExportToN8N('json')}
             disabled={isExporting}
           >
@@ -378,7 +378,7 @@ const N8NDataExport: React.FC<N8NDataExportProps> = ({ events }) => {
             Export data in CSV format for spreadsheet analysis
           </CardDescription>
           <Button
-            variant="primary"
+            $variant="primary"
             onClick={() => handleExportToN8N('csv')}
             disabled={isExporting}
           >
@@ -392,7 +392,7 @@ const N8NDataExport: React.FC<N8NDataExportProps> = ({ events }) => {
             Generate emotional wellness summary for N8N processing
           </CardDescription>
           <Button
-            variant="primary"
+            $variant="primary"
             onClick={() => handleExportToN8N('summary')}
             disabled={isExporting}
           >
@@ -406,7 +406,7 @@ const N8NDataExport: React.FC<N8NDataExportProps> = ({ events }) => {
             Trigger N8N workflow for emotional pattern analysis
           </CardDescription>
           <Button
-            variant="secondary"
+            $variant="secondary"
             onClick={handlePatternDetection}
             disabled={isExporting}
           >
