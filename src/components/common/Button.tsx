@@ -10,7 +10,11 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   iconPosition?: 'left' | 'right';
 }
 
-const StyledButton = styled.button<Omit<ButtonProps, 'fullWidth' | 'loading' | 'icon' | 'iconPosition'>>`
+const StyledButton = styled.button<{
+  $fullWidth?: boolean;
+  $variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'info';
+  $size?: 'small' | 'medium' | 'large';
+}>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -24,10 +28,10 @@ const StyledButton = styled.button<Omit<ButtonProps, 'fullWidth' | 'loading' | '
   position: relative;
   overflow: hidden;
   
-  ${({ fullWidth }) => fullWidth && 'width: 100%;'}
+  ${({ $fullWidth }) => $fullWidth && 'width: 100%;'}
   
-  ${({ size }) => {
-    switch (size) {
+  ${({ $size }) => {
+    switch ($size) {
       case 'small':
         return `
           padding: 6px 12px;
@@ -49,8 +53,8 @@ const StyledButton = styled.button<Omit<ButtonProps, 'fullWidth' | 'loading' | '
     }
   }}
   
-  ${({ variant }) => {
-    switch (variant) {
+  ${({ $variant }) => {
+    switch ($variant) {
       case 'primary':
         return `
           background: #4ECDC4;
@@ -191,9 +195,9 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <StyledButton
-      variant={variant}
-      size={size}
-      fullWidth={fullWidth}
+      $variant={variant}
+      $size={size}
+      $fullWidth={fullWidth}
       disabled={isDisabled}
       {...props}
     >

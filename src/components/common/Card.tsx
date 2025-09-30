@@ -11,21 +11,25 @@ export interface CardProps {
   hoverable?: boolean;
 }
 
-const StyledCard = styled.div<Omit<CardProps, 'hoverable' | 'onClick'>>`
+const StyledCard = styled.div<{
+  $variant?: 'default' | 'glass' | 'elevated' | 'outlined';
+  $padding?: 'none' | 'small' | 'medium' | 'large';
+  $hoverable?: boolean;
+}>`
   border-radius: 12px;
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
   
-  ${({ hoverable, onClick }) => (hoverable || onClick) && `
+  ${({ $hoverable }) => $hoverable && `
     cursor: pointer;
     &:hover {
       transform: translateY(-2px);
     }
   `}
   
-  ${({ variant }) => {
-    switch (variant) {
+  ${({ $variant }) => {
+    switch ($variant) {
       case 'glass':
         return `
           background: rgba(42, 42, 42, 0.8);
@@ -52,8 +56,8 @@ const StyledCard = styled.div<Omit<CardProps, 'hoverable' | 'onClick'>>`
     }
   }}
   
-  ${({ padding }) => {
-    switch (padding) {
+  ${({ $padding }) => {
+    switch ($padding) {
       case 'none':
         return 'padding: 0;';
       case 'small':
@@ -78,12 +82,12 @@ const Card: React.FC<CardProps> = ({
 }) => {
   return (
     <StyledCard
-      variant={variant}
-      padding={padding}
+      $variant={variant}
+      $padding={padding}
       className={className}
       style={style}
       onClick={onClick}
-      hoverable={hoverable}
+      $hoverable={hoverable}
       {...props}
     >
       {children}
