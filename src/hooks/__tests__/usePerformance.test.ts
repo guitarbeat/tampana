@@ -73,6 +73,11 @@ describe('useThrottle', () => {
 
     act(() => {
       result.current();
+    });
+
+    expect(mockFn).toHaveBeenCalledTimes(1);
+
+    act(() => {
       result.current();
       result.current();
     });

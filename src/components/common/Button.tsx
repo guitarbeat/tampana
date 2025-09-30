@@ -10,7 +10,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   iconPosition?: 'left' | 'right';
 }
 
-const StyledButton = styled.button<ButtonProps>`
+const StyledButton = styled.button<Omit<ButtonProps, 'fullWidth' | 'loading' | 'icon' | 'iconPosition'>>`
   display: inline-flex;
   align-items: center;
   justify-content: center;

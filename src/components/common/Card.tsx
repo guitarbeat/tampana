@@ -11,7 +11,7 @@ export interface CardProps {
   hoverable?: boolean;
 }
 
-const StyledCard = styled.div<CardProps>`
+const StyledCard = styled.div<Omit<CardProps, 'hoverable' | 'onClick'>>`
   border-radius: 12px;
   transition: all 0.2s ease;
   position: relative;
