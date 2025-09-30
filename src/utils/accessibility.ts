@@ -153,7 +153,7 @@ export const createTimeLabel = (
   switch (format) {
     case 'long':
       return time.toLocaleString();
-    case 'relative':
+    case 'relative': {
       const now = new Date();
       const diff = now.getTime() - time.getTime();
       const minutes = Math.floor(diff / 60000);
@@ -164,6 +164,7 @@ export const createTimeLabel = (
       if (hours > 0) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
       if (minutes > 0) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
       return 'Just now';
+    }
     default:
       return time.toLocaleDateString();
   }

@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import deadFile from 'vite-plugin-deadfile'
 import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
 
@@ -8,11 +7,6 @@ export default defineConfig({
   base: '/',
   plugins: [
     react(),
-    deadFile({
-      root: 'src',
-      output: 'dead-files.txt',
-      throwWhenFound: false
-    }),
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { ErrorNotification } from '../types/errors';
 
@@ -207,7 +207,7 @@ interface NotificationSystemProps {
 }
 
 const NotificationSystem: React.FC<NotificationSystemProps> = ({ notifications, onDismiss }) => {
-  const [exitingNotifications, setExitingNotifications] = React.useState<Set<string>>(new Set());
+  const [exitingNotifications, setExitingNotifications] = useState<Set<string>>(new Set());
 
   const handleDismiss = (id: string) => {
     setExitingNotifications(prev => new Set(prev).add(id));
@@ -222,7 +222,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ notifications, 
   };
 
   // Sync exiting notifications with the actual notifications array
-  React.useEffect(() => {
+  useEffect(() => {
     const currentIds = new Set(notifications.map(n => n.id));
     setExitingNotifications(prev => {
       const newSet = new Set<string>();

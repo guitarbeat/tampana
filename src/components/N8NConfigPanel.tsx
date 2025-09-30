@@ -273,8 +273,9 @@ const N8NConfigPanel: React.FC = () => {
       )}
 
       <FormGroup>
-        <Label>N8N Base URL</Label>
+        <Label htmlFor="baseUrl">N8N Base URL</Label>
         <Input
+          id="baseUrl"
           type="url"
           value={config.baseUrl}
           onChange={(e) => handleConfigChange('baseUrl', e.target.value)}
@@ -283,8 +284,9 @@ const N8NConfigPanel: React.FC = () => {
       </FormGroup>
 
       <FormGroup>
-        <Label>API Key (Optional)</Label>
+        <Label htmlFor="apiKey">API Key (Optional)</Label>
         <Input
+          id="apiKey"
           type="password"
           value={config.apiKey || ''}
           onChange={(e) => handleConfigChange('apiKey', e.target.value)}
@@ -293,8 +295,9 @@ const N8NConfigPanel: React.FC = () => {
       </FormGroup>
 
       <FormGroup>
-        <Label>Webhook URL</Label>
+        <Label htmlFor="webhookUrl">Webhook URL</Label>
         <Input
+          id="webhookUrl"
           type="url"
           value={config.webhookUrl || ''}
           onChange={(e) => handleConfigChange('webhookUrl', e.target.value)}
@@ -305,6 +308,7 @@ const N8NConfigPanel: React.FC = () => {
       <FormGroup>
         <Label>
           <Checkbox
+            id="enabled"
             type="checkbox"
             checked={config.enabled}
             onChange={(e) => handleConfigChange('enabled', e.target.checked)}
@@ -316,6 +320,7 @@ const N8NConfigPanel: React.FC = () => {
       <FormGroup>
         <Label>
           <Checkbox
+            id="autoSync"
             type="checkbox"
             checked={config.autoSync}
             onChange={(e) => handleConfigChange('autoSync', e.target.checked)}
@@ -325,8 +330,9 @@ const N8NConfigPanel: React.FC = () => {
       </FormGroup>
 
       <FormGroup>
-        <Label>Sync Interval (minutes)</Label>
+        <Label htmlFor="syncInterval">Sync Interval (minutes)</Label>
         <Select
+          id="syncInterval"
           value={config.syncInterval}
           onChange={(e) => handleConfigChange('syncInterval', parseInt(e.target.value))}
         >
