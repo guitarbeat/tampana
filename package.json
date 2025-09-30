@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:check": "npm run build && node scripts/deploy-check.js",
     "preview": "vite preview",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -14,7 +15,10 @@
     "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "deploy:check": "node scripts/deploy-check.js",
+    "deploy:vercel": "vercel --prod",
+    "deploy:preview": "vercel"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.16",
@@ -60,6 +64,7 @@
     "postcss": "^8.4.27",
     "prettier": "^3.3.3",
     "tailwindcss": "^3.3.3",
+    "terser": "^5.44.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",

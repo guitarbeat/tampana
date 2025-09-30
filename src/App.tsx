@@ -13,6 +13,7 @@ import { EmotionLog } from './types/emotion-log';
 import { useErrorNotifications } from './hooks/useErrorNotifications';
 import ErrorNotificationSystem from './components/ErrorNotificationSystem';
 import ErrorBoundary from './ErrorBoundary';
+import PerformanceMonitor from './components/PerformanceMonitor';
 import { getStorageItem, setStorageItem } from './utils/storage';
 import './index.css';
 import './styles/emotional-calendar.css';
@@ -403,6 +404,7 @@ function ThemedApp() {
         notifications={notifications} 
         onDismiss={dismissNotification} 
       />
+      <PerformanceMonitor />
     </AppContainer>
   );
 }
