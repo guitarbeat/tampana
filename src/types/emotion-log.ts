@@ -6,3 +6,12 @@ export interface EmotionLog {
   arousal: number;
   timestamp: string;
 }
+
+export interface EmotionalEvent {
+  id: string;
+  emotion: string;
+  intensity: number;
+  timestamp: string;
+  notes?: string;
+  tags?: string[];
+}

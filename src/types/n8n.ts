@@ -31,9 +31,9 @@ export interface EmotionalData {
 }
 
 export interface WebhookPayload {
-  eventType: 'emotion_logged' | 'pattern_detected' | 'threshold_alert' | 'daily_summary';
+  eventType: 'emotion_logged' | 'pattern_detected' | 'threshold_alert' | 'daily_summary' | 'patterns_detected' | 'insights_generated';
   timestamp: string;
-  data: EmotionalData | EmotionalEvent;
+  data: EmotionalData | EmotionalEvent | any;
   userId?: string;
   sessionId: string;
 }

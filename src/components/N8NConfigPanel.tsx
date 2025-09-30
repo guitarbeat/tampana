@@ -29,23 +29,34 @@ const Label = styled.label`
   font-weight: 500;
 `;
 
-const Input = styled.input`
+const Input = styled.input<{ hasError?: boolean }>`
   width: 100%;
   padding: 12px;
   background: #2a2a2a;
-  border: 1px solid #444;
+  border: 1px solid ${props => props.hasError ? '#ff4757' : '#444'};
   border-radius: 6px;
   color: #fff;
   font-size: 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   
   &:focus {
     outline: none;
-    border-color: #007acc;
-    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+    border-color: ${props => props.hasError ? '#ff6b7a' : '#007acc'};
+    box-shadow: 0 0 0 2px ${props => props.hasError ? 'rgba(255, 71, 87, 0.2)' : 'rgba(0, 122, 204, 0.2)'};
   }
   
   &::placeholder {
     color: #666;
+  }
+  
+  &:invalid {
+    border-color: #ff4757;
+  }
+  
+  /* Enhanced accessibility */
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
   }
 `;
 

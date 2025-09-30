@@ -48,15 +48,51 @@ const Notification = styled.div<{ type: ErrorNotification['type']; isExiting: bo
   }};
   color: white;
   padding: 16px 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
   pointer-events: auto;
-  animation: ${props => props.isExiting ? slideOut : slideIn} 0.3s ease-in-out;
+  animation: ${props => props.isExiting ? slideOut : slideIn} 0.3s ease-out;
   position: relative;
-  overflow: hidden;
-  role: alert;
-  aria-live: polite;
-  tabindex: -1;
+  max-width: 100%;
+  word-wrap: break-word;
+  
+  /* Enhanced accessibility */
+  border: 2px solid ${props => {
+    switch (props.type) {
+      case 'error': return '#ff6b7a';
+      case 'warning': return '#ffb82e';
+      case 'info': return '#5a67fa';
+      case 'success': return '#58d68d';
+      default: return '#57606f';
+    }
+  }};
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    border: 3px solid currentColor;
+    background: ${props => {
+      switch (props.type) {
+        case 'error': return '#d32f2f';
+        case 'warning': return '#f57c00';
+        case 'info': return '#1976d2';
+        case 'success': return '#388e3c';
+        default: return '#424242';
+      }
+    }};
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transition: opacity 0.2s ease;
+  }
+  
+  /* Focus management */
+  &:focus-within {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+  }
 `;
 
 const NotificationHeader = styled.div`
@@ -92,15 +128,22 @@ const CloseButton = styled.button`
   justify-content: center;
   opacity: 0.7;
   transition: opacity 0.2s ease;
-  aria-label: "Dismiss notification";
+  min-width: 24px;
+  min-height: 24px;
 
   &:hover {
     opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
   }
 
   &:focus {
-    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline: 2px solid rgba(255, 255, 255, 0.8);
     outline-offset: 2px;
+    opacity: 1;
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 
   svg {
@@ -230,39 +273,59 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({ notifications, 
           key={notification.id}
           type={notification.type}
           isExiting={exitingNotifications.has(notification.id)}
+          role={notification.type === 'error' ? 'alert' : 'status'}
+          aria-live={notification.type === 'error' ? 'assertive' : 'polite'}
+          aria-atomic="true"
+          aria-describedby={`notification-message-${notification.id}`}
+          tabIndex={notification.dismissible ? 0 : -1}
         >
           <NotificationHeader>
             <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-              <IconContainer>
+              <IconContainer aria-hidden="true">
                 {getIcon(notification.type)}
               </IconContainer>
-              <NotificationTitle>{notification.title}</NotificationTitle>
+              <NotificationTitle id={`notification-title-${notification.id}`}>
+                {notification.title}
+              </NotificationTitle>
             </div>
             {notification.dismissible && (
               <CloseButton 
                 onClick={() => handleDismiss(notification.id)}
                 aria-label={`Dismiss ${notification.title} notification`}
+                type="button"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <svg 
+                  viewBox="0 0 24 24" 
+                  fill="currentColor" 
+                  aria-hidden="true"
+                  style={{ width: '16px', height: '16px' }}
+                >
                   <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
                 </svg>
               </CloseButton>
             )}
           </NotificationHeader>
           
-          <NotificationMessage>{notification.message}</NotificationMessage>
+          <NotificationMessage id={`notification-message-${notification.id}`}>
+            {notification.message}
+          </NotificationMessage>
           
           {notification.action && (
             <ActionButton 
               onClick={notification.action.handler}
               aria-label={`${notification.action.label} for ${notification.title}`}
+              type="button"
             >
               {notification.action.label}
             </ActionButton>
           )}
           
           {notification.duration && notification.duration > 0 && (
-            <ProgressBar duration={notification.duration} />
+            <ProgressBar 
+              duration={notification.duration}
+              role="progressbar"
+              aria-label="Time remaining for this notification"
+            />
           )}
         </Notification>
       ))}

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:check": "npm run build && node scripts/deploy-check.js",
     "preview": "vite preview",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -14,7 +15,10 @@
     "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "deploy:check": "node scripts/deploy-check.js",
+    "deploy:vercel": "vercel --prod",
+    "deploy:preview": "vercel"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.16",
@@ -27,18 +31,24 @@
     "styled-components": "^6.1.18",
     "uuid": "^9.0.1",
     "veaury": "^2.6.2",
-    "vue-cal": "^5.0.1-rc.25"
+    "vue": "^3.5.22",
+    "vue-cal": "^5.0.1-rc.25",
+    "workbox-precaching": "^7.3.0",
+    "workbox-routing": "^7.3.0",
+    "workbox-strategies": "^7.3.0",
+    "workbox-window": "^7.3.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^14.1.2",
     "@types/jest": "^29.5.4",
+    "@types/node": "^24.6.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.8.1",
     "@typescript-eslint/parser": "^8.8.1",
-    "@vitejs/plugin-react": "^4.0.3",
+    "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.14",
     "eslint": "^9.7.0",
     "eslint-config-prettier": "^9.1.0",
@@ -55,10 +65,11 @@
     "postcss": "^8.4.27",
     "prettier": "^3.3.3",
     "tailwindcss": "^3.3.3",
+    "terser": "^5.44.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5",
+    "vite": "^7.1.7",
     "vite-plugin-deadfile": "^1.4.0",
-    "vite-plugin-pwa": "^0.20.0"
+    "vite-plugin-pwa": "^1.0.3"
   }
 }

@@ -10,7 +10,7 @@ const springConfig = {
   duration: 300, // ms
 };
 
-interface SplitScreenProps {
+export interface SplitScreenProps {
   borderRadius: number;
   handleHeight: number;
   topSnapPointHeight: number;
@@ -157,7 +157,6 @@ const useSplitScreen = ({
   const [isDragging, setIsDragging] = useState(false);
   const [startY, setStartY] = useState(0);
   const [startHeight, setStartHeight] = useState(0);
-  const [currentSnapPointIndex, setCurrentSnapPointIndex] = useState(0);
 
   // * Calculate snap points based on container height
   const snapPoints = React.useMemo(() => {
@@ -238,10 +237,11 @@ const useSplitScreen = ({
     setBottomComponentHeight(newHeight);
 
     // * Update current snap point index
-    const closestSnapPoint = snapPoints.reduce((prev, curr) => {
-      return Math.abs(curr - newHeight) < Math.abs(prev - newHeight) ? curr : prev;
-    });
-    setCurrentSnapPointIndex(snapPoints.indexOf(closestSnapPoint));
+    // TODO: Implement snap point tracking for future features
+    // const closestSnapPoint = snapPoints.reduce((prev, curr) => {
+    //   return Math.abs(curr - newHeight) < Math.abs(prev - newHeight) ? curr : prev;
+    // });
+    // setCurrentSnapPointIndex(snapPoints.indexOf(closestSnapPoint)));
   }, [isDragging, startY, startHeight, snapPoints]);
 
   // * Handle mouse/touch end
@@ -251,7 +251,8 @@ const useSplitScreen = ({
     setIsDragging(false);
     const targetHeight = findClosestSnapPoint(bottomComponentHeight, velocity);
     setBottomComponentHeight(targetHeight);
-    setCurrentSnapPointIndex(snapPoints.indexOf(targetHeight));
+    // TODO: Implement snap point index tracking for future features
+    // setCurrentSnapPointIndex(snapPoints.indexOf(targetHeight));
   }, [isDragging, bottomComponentHeight, findClosestSnapPoint, snapPoints]);
 
   // * Mouse event handlers
@@ -274,7 +275,8 @@ const useSplitScreen = ({
 
     const handleMouseMove = (e: MouseEvent) => {
       const currentTime = Date.now();
-      const velocity = lastY !== 0 ? (lastY - e.clientY) / (currentTime - lastTime) : 0;
+      // TODO: Velocity calculation can be implemented for momentum-based scrolling
+      // const velocity = lastY !== 0 ? (lastY - e.clientY) / (currentTime - lastTime) : 0;
       lastY = e.clientY;
       lastTime = currentTime;
       handleMove(e.clientY);
@@ -283,7 +285,8 @@ const useSplitScreen = ({
     const handleTouchMove = (e: TouchEvent) => {
       const currentTime = Date.now();
       const clientY = e.touches[0].clientY;
-      const velocity = lastY !== 0 ? (lastY - clientY) / (currentTime - lastTime) : 0;
+      // TODO: Velocity calculation can be implemented for momentum-based scrolling
+      // const velocity = lastY !== 0 ? (lastY - clientY) / (currentTime - lastTime) : 0;
       lastY = clientY;
       lastTime = currentTime;
       handleMove(clientY);
