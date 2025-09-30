@@ -5,7 +5,7 @@ import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/tampana/' : '/',
+  base: '/',
   plugins: [
     react(),
     deadFile({
@@ -50,6 +50,15 @@ export default defineConfig({
     outDir: path.resolve(__dirname, 'dist'),
     emptyOutDir: true,
     sourcemap: true,
-    // Remove the custom rollupOptions.input
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          vue: ['vue-cal'],
+          utils: ['date-fns', 'uuid', 'axios']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
   }
 })
