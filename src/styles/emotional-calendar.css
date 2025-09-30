@@ -124,43 +124,39 @@
   border-color: rgba(78, 205, 196, 0.8) !important;
 }
 
-/* Refined cell styling */
+/* Simplified and cleaner cell styling */
 .vuecal__cell {
   border: none !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
   transition: all 0.2s ease !important;
   position: relative !important;
+  min-height: 60px !important;
+  background: transparent !important;
 }
 
 .vuecal__cell:hover {
-  background: rgba(255, 255, 255, 0.02) !important;
+  background: rgba(78, 205, 196, 0.05) !important;
 }
 
-.vuecal__cell::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, transparent 100%);
-  pointer-events: none;
-}
-
-/* Enhanced time cells */
+/* Enhanced time cells - simplified and cleaner */
 .vuecal__time-cell {
-  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
-  background: rgba(255, 255, 255, 0.015) !important;
-  color: rgba(255, 255, 255, 0.6) !important;
-  font-size: var(--text-xs) !important;
-  font-weight: var(--font-medium) !important;
-  letter-spacing: var(--tracking-wide) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: var(--text-sm) !important;
+  font-weight: var(--font-semibold) !important;
+  letter-spacing: var(--tracking-normal) !important;
   backdrop-filter: blur(8px) !important;
+  padding: 12px 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 60px !important;
 }
 
 .vuecal__time-cell:hover {
-  background: rgba(255, 255, 255, 0.03) !important;
-  color: rgba(255, 255, 255, 0.85) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 /* Modern all-day events section */
@@ -170,27 +166,48 @@
   border-radius: 8px 8px 0 0 !important;
 }
 
-/* Sophisticated header styling */
+/* Simplified header styling - minimal and clean */
 .vuecal__header {
   border: none !important;
-  background: rgba(255, 255, 255, 0.03) !important;
-  border-radius: 12px 12px 0 0 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-radius: 16px 16px 0 0 !important;
+  box-shadow: none !important;
+  min-height: auto !important;
 }
 
 .vuecal__title-bar {
   background: transparent !important;
   border: none !important;
-  padding: 16px 20px !important;
-  border-radius: 12px 12px 0 0 !important;
+  padding: 20px !important;
+  border-radius: 16px 16px 0 0 !important;
+  display: none !important; /* Hide title bar for cleaner look */
 }
 
 .vuecal__title {
   color: rgba(255, 255, 255, 0.95) !important;
   font-weight: var(--font-bold) !important;
-  font-size: var(--text-xl) !important;
-  letter-spacing: var(--tracking-wide) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  font-size: var(--text-lg) !important;
+  letter-spacing: var(--tracking-normal) !important;
+  text-shadow: none !important;
+}
+
+/* Hide weekdays header for minimal design */
+.vuecal__weekdays-headings {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  min-height: auto !important;
+}
+
+/* Simplify weekday headers */
+.vuecal__heading {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: var(--font-medium) !important;
+  font-size: var(--text-sm) !important;
+  padding: 8px !important;
+  border: none !important;
+  text-align: center !important;
 }
 
 /* Enhanced menu styling */
