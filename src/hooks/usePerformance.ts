@@ -77,7 +77,7 @@ export const useThrottle = <T extends (...args: any[]) => any>(
 
   return useCallback(
     ((...args: Parameters<T>) => {
-      const now = performance.now();
+      const now = Date.now();
       
       if (now - lastCallTime.current >= delay) {
         lastCallTime.current = now;
@@ -85,7 +85,7 @@ export const useThrottle = <T extends (...args: any[]) => any>(
       } else {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
-          lastCallTime.current = performance.now();
+          lastCallTime.current = Date.now();
           callback(...args);
         }, delay - (now - lastCallTime.current));
       }

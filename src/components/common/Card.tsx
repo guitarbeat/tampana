@@ -15,13 +15,14 @@ const StyledCard = styled.div<{
   $variant?: 'default' | 'glass' | 'elevated' | 'outlined';
   $padding?: 'none' | 'small' | 'medium' | 'large';
   $hoverable?: boolean;
+  onClick?: () => void;
 }>`
   border-radius: 12px;
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
   
-  ${({ $hoverable }) => $hoverable && `
+  ${({ $hoverable, onClick }) => (onClick || $hoverable) && `
     cursor: pointer;
     &:hover {
       transform: translateY(-2px);
