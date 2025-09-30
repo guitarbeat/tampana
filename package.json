@@ -31,6 +31,7 @@
     "styled-components": "^6.1.18",
     "uuid": "^9.0.1",
     "veaury": "^2.6.2",
+    "vue": "^3.5.22",
     "vue-cal": "^5.0.1-rc.25",
     "workbox-precaching": "^7.3.0",
     "workbox-routing": "^7.3.0",
@@ -47,7 +48,7 @@
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.8.1",
     "@typescript-eslint/parser": "^8.8.1",
-    "@vitejs/plugin-react": "^4.0.3",
+    "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.14",
     "eslint": "^9.7.0",
     "eslint-config-prettier": "^9.1.0",
@@ -67,8 +68,8 @@
     "terser": "^5.44.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5",
+    "vite": "^7.1.7",
     "vite-plugin-deadfile": "^1.4.0",
-    "vite-plugin-pwa": "^0.20.0"
+    "vite-plugin-pwa": "^1.0.3"
   }
 }
